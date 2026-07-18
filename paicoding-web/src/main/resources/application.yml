@@ -1,0 +1,110 @@
+server:
+  port: 8080
+  servlet:
+    session:
+      timeout: 5m
+  compression:
+    enabled: true
+    min-response-size: 2KB
+ai:
+  task-plan:
+    allow-reopen-completed-step: false
+spring:
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+    additional-paths: src/main/resources/static/**
+  application:
+    name: codemate
+  config:
+          import: application-dal.yml,application-web.yml,application-config.yml,application-image.yml,application-email.yml,application-rabbitmq.yml,application-ai.yml
+  main:
+    allow-bean-definition-overriding: true
+    allow-circular-references: true
+  mvc:
+    async:
+      request-timeout:
+  liquibase:
+    change-log: classpath:liquibase/master.xml
+    enabled: true
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 10MB
+servlet:
+  tomcat:
+    max-swallow-size: -1
+security:
+  salt: ${PAICODING_SECURITY_SALT:}
+  salt-index: 3
+paicoding:
+  sensitive:
+    enable: true
+    deny:
+    allow: 国庆,制作,台湾,亚洲,中国,公司,简历,性感,考研,韩国,重庆,用户,扑克,法国,鲁迅,祖国,台湾,色​​情,俄罗斯
+  jwt:
+    issuer: pai_coding
+    secret: ${JWT_SECRET:}
+    expire: 432000000
+  openapi:
+    app-ids: test-app
+    ip-white-list: 0.0.0.0/0
+    oc-login-redirect-url: http://localhost:8087/api/wx/pai/callback
+database:
+  name: pai_coding
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+knife4j:
+  enable: true
+  setting:
+    language: zh-CN
+  openapi:
+    title: CodeMate
+    description: CodeMate technical community
+    version: 1.0.0
+    concat:
+      - 一团灰 | 楼仔 | 沉默王二
+      - https://paicoding.com
+      - https://github.com/itwanger/paicoding
+    license: Apache License 2.0
+    license-url: https://github.com/itwanger/paicoding/blob/main/License
+    email: bangzewu@126.com
+    group:
+      admin:
+        group-name: 后台接口分组
+        api-rule: package
+        api-rule-resources:
+          - com.github.paicoding.forum.web.admin
+      front:
+        group-name: 前台接口分组
+        api-rule: package
+        api-rule-resources:
+          - com.github.paicoding.forum.web.front
+logging:
+  level:
+    com.github.paicoding.forum.service.rank.service.impl.*: debug
+    org:
+      springframework:
+        web:
+          servlet:
+            handler.*: info
+management:
+  server:
+    address: 127.0.0.1
+    port: 8999
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  health:
+    elasticsearch:
+      enabled: false
+    mail:
+      enabled: false

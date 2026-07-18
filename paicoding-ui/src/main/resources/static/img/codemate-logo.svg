@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 214 48" role="img" aria-labelledby="title">
+  <title id="title">CodeMate</title>
+  <defs>
+    <linearGradient id="brand" x1="4" y1="4" x2="44" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="44" height="44" rx="12" fill="url(#brand)"/>
+  <path d="m20 15-7 9 7 9m10-18 7 9-7 9m-4-22-5 24" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.7"/>
+  <text x="58" y="32" fill="#172554" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700" letter-spacing="-.6">CodeMate</text>
+</svg>

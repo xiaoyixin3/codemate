@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<div th:replace="components/layout/header :: head(~{::title}, ~{}, ~{})"><title>任务计划详情 - CodeMate</title></div>
+<link rel="stylesheet" href="/css/views/task-plan.css" th:href="${global.siteInfo.oss + '/css/views/task-plan.css'}"/>
+<body class="bg-color task-plan-page">
+<div th:replace="components/layout/navbar :: navbar"></div>
+<main class="container task-plan-container">
+  <div class="task-plan-heading task-plan-detail-heading"><div><a class="task-plan-back" href="/task-plan">← 返回任务计划</a><h1 id="plan-title">任务计划详情</h1></div><div id="plan-actions"></div></div>
+  <div id="task-plan-feedback" class="task-plan-feedback" role="status" aria-live="polite"></div>
+  <div id="task-plan-detail" aria-live="polite"></div>
+</main>
+<div th:replace="components/layout/footer :: footer"></div>
+<script src="/js/views/task-plan.js" th:src="${global.siteInfo.oss + '/js/views/task-plan.js'}"></script>
+</body></html>

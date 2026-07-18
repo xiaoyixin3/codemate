@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:mysql://pre.hhui.top/${database.name}?useUnicode=true&allowPublicKeyRetrieval=true&autoReconnect=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: ${DB_USERNAME:}
+    password: ${DB_PASSWORD:}
+  redis:
+    host: localhost
+    port: 6379
+    password: ${REDIS_PASSWORD:}
+
+elasticsearch:
+  open: false
+  clusterName: elasticsearch
+  hosts: 127.0.0.1:9200
+  userName: ${ELASTICSEARCH_USERNAME:}
+  password: ${ELASTICSEARCH_PASSWORD:}
+  scheme: http
+  connectTimeOut: 1000
+  socketTimeOut: 30000
+  connectionRequestTimeOut: 500
+  maxConnectNum: 100
+  maxConnectNumPerRoute: 100

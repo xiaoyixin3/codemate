@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet id="20260717_1" author="CodeMate">
+        <createTable tableName="ai_knowledge_chunk" remarks="站内知识 RAG 分块与向量">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="article_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="chunk_index" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="title" type="VARCHAR(256)"/>
+            <column name="content" type="MEDIUMTEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content_hash" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="embedding" type="MEDIUMTEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="embedding_model" type="VARCHAR(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="TINYINT" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+            <column name="create_time" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="update_time" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <addUniqueConstraint tableName="ai_knowledge_chunk"
+                             columnNames="article_id, chunk_index, embedding_model"
+                             constraintName="uk_ai_knowledge_article_chunk_model"/>
+        <createIndex tableName="ai_knowledge_chunk" indexName="idx_ai_knowledge_enabled_model">
+            <column name="enabled"/>
+            <column name="embedding_model"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

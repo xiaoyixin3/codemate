@@ -1,0 +1,13 @@
+view:
+  site:
+    needLoginArticleReadCount: 30
+    websiteName: CodeMate
+    websiteLogoUrl: /img/codemate-logo.svg
+    websiteFaviconIconUrl: /img/codemate-icon.svg
+    contactMeTitle: Contact CodeMate
+    pageSize: 20
+    cdnImgStyle:
+    websiteRecord:
+    host: http://127.0.0.1:${server.port}
+    welcomeInfo: Welcome to CodeMate
+    oss:

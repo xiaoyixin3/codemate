@@ -1,0 +1,8 @@
+rabbitmq:
+  host: 127.0.0.1
+  port: 5672
+  username: ${RABBITMQ_USERNAME:}
+  passport: ${RABBITMQ_PASSWORD:}
+  virtualhost: /
+  switch_flag: false
+  pool_size: 10

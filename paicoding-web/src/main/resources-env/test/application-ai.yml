@@ -1,0 +1,67 @@
+net:
+  proxy:
+    - ip: 127.0.0.1
+      port: 1080
+      type: SOCKS
+
+chatgpt:
+  main: CHAT_GPT_3_5
+  conf:
+    CHAT_GPT_3_5:
+      keys:
+        - ${OPENAI_API_KEY:}
+      proxy: true
+      apiHost: https://api.openai.com/
+      timeOut: 900
+      maxToken: 1000
+    CHAT_GPT_4:
+      keys:
+        - ${OPENAI_GPT4_API_KEY:}
+      proxy: true
+      apiHost: https://api.openai.com/
+      timeOut: 900
+      maxToken: 1000
+  number:
+    normal: 50
+    vip: 100
+
+xunfei:
+  hostUrl: http://spark-api.xf-yun.com/v1.1/chat
+  appId: ${XUNFEI_APP_ID:}
+  apiKey: ${XUNFEI_API_KEY:}
+  apiSecret: ${XUNFEI_API_SECRET:}
+
+deepseek:
+  apiHost: https://api.deepseek.com
+  apiKey: ${DEEPSEEK_API_KEY:}
+  timeout: 900
+
+doubao:
+  api-key: ${DOUBAO_API_KEY:}
+  api-host: https://ark.cn-beijing.volces.com/api/v3
+  end-point: ${DOUBAO_ENDPOINT:}
+
+codemate:
+  langchain4j:
+    enabled: ${LANGCHAIN4J_ENABLED:true}
+    fallback-enabled: ${LANGCHAIN4J_FALLBACK_ENABLED:true}
+    base-url: ${DEEPSEEK_API_HOST:https://api.deepseek.com/v1}
+    api-key: ${DEEPSEEK_API_KEY:}
+    chat-model: ${DEEPSEEK_MODEL:deepseek-chat}
+    temperature: ${AGENT_TEMPERATURE:0.2}
+    timeout-seconds: ${AGENT_TIMEOUT_SECONDS:120}
+    memory-max-messages: ${AGENT_MEMORY_MAX_MESSAGES:20}
+    max-tool-round-trips: ${AGENT_MAX_TOOL_ROUND_TRIPS:3}
+    log-requests: ${AGENT_LOG_REQUESTS:false}
+    log-responses: ${AGENT_LOG_RESPONSES:false}
+  rag:
+    enabled: ${RAG_ENABLED:false}
+    api-host: ${EMBEDDING_API_HOST:https://api.openai.com/v1}
+    api-key: ${EMBEDDING_API_KEY:}
+    embedding-model: ${EMBEDDING_MODEL:text-embedding-3-small}
+    chunk-size: 1000
+    chunk-overlap: 150
+    top-k: 5
+    max-candidate-chunks: 2000
+    min-score: 0.45
+    timeout-seconds: 60

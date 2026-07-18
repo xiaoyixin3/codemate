@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    <changeSet id="20260714-remove-legacy-membership" author="codex">
+        <update tableName="article">
+            <column name="read_type" valueNumeric="0"/>
+            <where>read_type = 3</where>
+        </update>
+        <update tableName="column_info">
+            <column name="type" valueNumeric="0"/>
+            <where>type = 3</where>
+        </update>
+        <update tableName="column_article">
+            <column name="read_type" valueNumeric="0"/>
+            <where>read_type = 3</where>
+        </update>
+        <delete tableName="dict_common">
+            <where>type_code = 'ColumnArticleRead' AND dict_code = '3'</where>
+        </delete>
+        <dropColumn tableName="user_ai" columnName="star_number"/>
+        <dropColumn tableName="user_ai" columnName="star_type"/>
+        <dropColumn tableName="user_ai" columnName="inviter_user_id"/>
+        <dropColumn tableName="user_ai" columnName="invite_code"/>
+        <dropColumn tableName="user_ai" columnName="invite_num"/>
+        <dropColumn tableName="user_ai" columnName="strategy"/>
+        <dropColumn tableName="user_ai" columnName="state"/>
+        <dropColumn tableName="user_ai" columnName="star_expire_time"/>
+        <dropColumn tableName="user" columnName="third_account_id"/>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<div th:replace="components/layout/header :: head(~{::title}, ~{}, ~{})"><title>任务计划 - CodeMate</title></div>
+<link rel="stylesheet" href="/css/views/task-plan.css" th:href="${global.siteInfo.oss + '/css/views/task-plan.css'}"/>
+<body class="bg-color task-plan-page">
+<div th:replace="components/layout/navbar :: navbar"></div>
+<main class="container task-plan-container">
+  <div class="task-plan-heading"><div><h1>任务计划</h1><p>集中查看并推进 CodeMate 为你生成的执行计划。</p></div><a class="btn btn-primary" href="/chat">新建任务规划</a></div>
+  <section class="task-plan-toolbar" aria-label="筛选任务计划">
+    <div class="input-group"><input id="plan-keyword" class="form-control" maxlength="128" placeholder="搜索标题或会话 ID"><div class="input-group-append"><button id="plan-search" class="btn btn-outline-secondary" type="button">搜索</button></div></div>
+    <select id="plan-status" class="form-control" aria-label="计划状态"><option value="">全部状态</option><option value="0">草稿</option><option value="1">待开始</option><option value="2">进行中</option><option value="3">已完成</option><option value="4">已取消</option></select>
+  </section>
+  <div id="task-plan-feedback" class="task-plan-feedback" role="status" aria-live="polite"></div>
+  <section id="task-plan-list" class="task-plan-list" aria-live="polite"></section>
+  <nav id="task-plan-pagination" class="task-plan-pagination" aria-label="任务计划分页"></nav>
+</main>
+<div th:replace="components/layout/footer :: footer"></div>
+<script src="/js/views/task-plan.js" th:src="${global.siteInfo.oss + '/js/views/task-plan.js'}"></script>
+</body></html>
