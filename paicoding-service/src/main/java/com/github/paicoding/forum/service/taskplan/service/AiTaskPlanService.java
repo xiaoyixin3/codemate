@@ -5,6 +5,7 @@ import com.github.paicoding.forum.api.model.vo.taskplan.AiTaskPlanDetailVo;
 import com.github.paicoding.forum.api.model.vo.taskplan.AiTaskPlanListVo;
 import com.github.paicoding.forum.api.model.vo.taskplan.AiTaskPlanReopenReq;
 import com.github.paicoding.forum.api.model.vo.taskplan.AiTaskPlanStepResultUpdateReq;
+import com.github.paicoding.forum.api.model.vo.taskplan.AiTaskPlanStepCreateReq;
 import com.github.paicoding.forum.api.model.vo.taskplan.AiTaskPlanStepStatusUpdateReq;
 import com.github.paicoding.forum.api.model.vo.taskplan.AiTaskPlanUpdateReq;
 
@@ -28,6 +29,8 @@ public interface AiTaskPlanService {
     void updateStepStatus(Long userId, Long planId, Long stepId, AiTaskPlanStepStatusUpdateReq req);
 
     void saveStepResult(Long userId, Long planId, Long stepId, AiTaskPlanStepResultUpdateReq req);
+
+    Long addStep(Long userId, Long planId, AiTaskPlanStepCreateReq req);
 
     void reopenPlan(Long userId, Long planId, AiTaskPlanReopenReq req);
 }

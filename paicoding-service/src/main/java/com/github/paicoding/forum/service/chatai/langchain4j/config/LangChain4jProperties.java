@@ -16,7 +16,17 @@ public class LangChain4jProperties {
     private double temperature = 0.2D;
     private int timeoutSeconds = 120;
     private int memoryMaxMessages = 20;
+    private int memorySummaryMaxChars = 4000;
+    private int memoryPreferenceMaxItems = 20;
     private int maxToolRoundTrips = 3;
+    private long toolTimeoutMillis = 3000L;
+    private int toolMaxOutputChars = 12000;
+    private int toolMaxKeywordLength = 80;
+    private int toolMaxArticleContentChars = 6000;
+    private int maxRunToolCalls = 8;
+    private int maxRunExecutionSeconds = 180;
+    private int maxRunTokenBudget = 16000;
+    private long runSweeperDelayMillis = 10000L;
     private boolean logRequests;
     private boolean logResponses;
 

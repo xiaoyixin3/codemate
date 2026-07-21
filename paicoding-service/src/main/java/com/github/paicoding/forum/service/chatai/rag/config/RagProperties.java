@@ -18,4 +18,11 @@ public class RagProperties {
     private int maxCandidateChunks = 2000;
     private double minScore = 0.45D;
     private long timeoutSeconds = 60L;
+    private String indexVersion = "v2-hybrid";
+    private int keywordCandidateChunks = 200;
+    private int vectorCandidateChunks = 1000;
+    private double vectorWeight = 0.65D;
+    private double keywordWeight = 0.25D;
+    private double freshnessWeight = 0.10D;
+    private int debugMaxResults = 20;
 }

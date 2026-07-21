@@ -7,6 +7,7 @@ import com.github.paicoding.forum.core.cache.RedisClient;
 import com.github.paicoding.forum.service.chatai.bot.AiBots;
 import com.github.paicoding.forum.service.chatai.constants.ChatConstants;
 import com.github.paicoding.forum.service.chatai.service.ChatHistoryService;
+import com.github.paicoding.forum.service.chatai.memory.ConversationMemoryCleanupService;
 import com.github.paicoding.forum.service.user.service.UserAiService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,8 @@ public class ChatHistoryServiceImpl implements ChatHistoryService {
     private UserAiService userAiService;
     @Autowired
     private AiBots aiBots;
+    @Autowired
+    private ConversationMemoryCleanupService memoryCleanupService;
 
     /**
      * 列出聊天会话
@@ -148,10 +151,15 @@ public class ChatHistoryServiceImpl implements ChatHistoryService {
      */
     @Override
     public Boolean removeChatSession(AISourceEnum source, String chatId, Long userId) {
+        if (userId == null || StringUtils.isBlank(chatId)) {
+            throw new IllegalArgumentException("Authenticated user and chat id are required");
+        }
         // 构造Redis中AI聊天列表的键
         String key = ChatConstants.getAiChatListKey(source, userId);
         // 使用Redis的hDel命令移除指定的聊天会话，并返回操作结果
         RedisClient.hDel(key, chatId);
+        RedisClient.del(getChatIdKey(source, userId, chatId));
+        memoryCleanupService.clear(userId, chatId, source);
         return true;
     }
 

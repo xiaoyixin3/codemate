@@ -10,4 +10,5 @@ public class AiTaskPlanStepStatusUpdateReq {
     private Integer status;
     private String blockedReason;
     private String skippedReason;
+    private String idempotencyKey;
 }

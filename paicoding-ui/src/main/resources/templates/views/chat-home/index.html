@@ -221,6 +221,29 @@
 
 
     // 添加服务器端消息
+    function renderBugDiagnosis(raw) {
+        try {
+            let normalized = (raw || '').trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+            const diagnosis = JSON.parse(normalized);
+            const causes = (diagnosis.causeHypotheses || []).map(function (cause) {
+                const confidence = Math.round((Number(cause.confidence) || 0) * 100);
+                const evidence = (cause.supportingEvidence || []).map(function (item) { return `<li>${escapeHtml(String(item))}</li>`; }).join('');
+                return `<li><strong>${escapeHtml(cause.hypothesis || '')}</strong>（置信度 ${confidence}%）${evidence ? `<ul>${evidence}</ul>` : ''}</li>`;
+            }).join('');
+            const sources = (diagnosis.supportingEvidence || []).map(function (item) {
+                const article = item.articleId ? ` <a href="/article/detail/${encodeURIComponent(item.articleId)}" target="_blank">文章 #${escapeHtml(String(item.articleId))}</a>` : '（站内证据不足）';
+                return `<li><strong>${escapeHtml(item.title || '')}</strong>${article}<br>${escapeHtml(item.excerpt || '')}</li>`;
+            }).join('');
+            const list = function (values) { return `<ol>${(values || []).map(function (item) { return `<li>${escapeHtml(String(item))}</li>`; }).join('')}</ol>`; };
+            return `<h2>问题摘要</h2><p>${escapeHtml(diagnosis.problemSummary || '')}</p>`
+                + `<h2>原因假设</h2><ol>${causes}</ol><h2>支持证据</h2><ul>${sources}</ul>`
+                + `<h2>验证步骤</h2>${list(diagnosis.verificationSteps)}<h2>修复建议</h2>${list(diagnosis.fixSuggestions)}`
+                + `<h2>回归验证方案</h2>${list(diagnosis.regressionPlan)}`;
+        } catch (e) {
+            return converter.makeHtml(raw || '');
+        }
+    }
+
     function appendServerMessage(answer) {
         let content = answer.answer;
         let draftContent = content;
@@ -229,8 +252,8 @@
         let chatId = answer.chatUid
         let appendLastChat = false;
         const taskPlanEntry = answer.planId ? `<div class="mt-2"><a class="btn btn-sm btn-primary" href="/task-plan/${answer.planId}">查看任务计划</a></div>` : '';
-        const diagnosisPlanEntry = answer.agentMode === 'BUG_DIAGNOSIS' && answerType === 'STREAM_END'
-            ? `<div class="mt-2"><button type="button" class="btn btn-sm btn-outline-primary convert-bug-plan" data-chat-uid="${chatId}">转为任务计划</button></div>` : '';
+        const diagnosisPlanEntry = answer.agentMode === 'BUG_DIAGNOSIS' && answerType === 'STREAM_END' && answer.diagnosisId
+            ? `<div class="mt-2"><button type="button" class="btn btn-sm btn-outline-primary save-bug-plan" data-diagnosis-id="${answer.diagnosisId}">保存为修复计划</button></div>` : '';
         console.log("准备添加内容:", answer);
         // 如果 source 等于"CHAT_GPT_3_5"
         if("JSON" === answerType) {
@@ -254,7 +277,8 @@
         } else if ('STREAM' === answerType || 'STREAM_END' === answerType) {
             const lastDiv = $(`#${chatId}`)
             console.log("流式结果返回: ", content, lastDiv);
-            content = converter.makeHtml(content);
+            content = answer.agentMode === 'BUG_DIAGNOSIS' && answerType === 'STREAM_END'
+                ? renderBugDiagnosis(content) : converter.makeHtml(content);
             // content = prettyCode(content.replaceAll('$…$', ''));
             console.log("流式结果转 HTML: ", content)
 
@@ -264,9 +288,9 @@
                 if (answer.planId && lastDiv.siblings('.task-plan-chat-entry').length === 0) {
                     lastDiv.after(`<div class="task-plan-chat-entry mt-2"><a class="btn btn-sm btn-primary" href="/task-plan/${answer.planId}">查看任务计划</a></div>`);
                 }
-                if (answer.agentMode === 'BUG_DIAGNOSIS' && answerType === 'STREAM_END'
+                if (answer.agentMode === 'BUG_DIAGNOSIS' && answerType === 'STREAM_END' && answer.diagnosisId
                     && lastDiv.siblings('.bug-plan-chat-entry').length === 0) {
-                    lastDiv.after(`<div class="bug-plan-chat-entry mt-2"><button type="button" class="btn btn-sm btn-outline-primary convert-bug-plan" data-chat-uid="${chatId}">转为任务计划</button></div>`);
+                    lastDiv.after(`<div class="bug-plan-chat-entry mt-2"><button type="button" class="btn btn-sm btn-outline-primary save-bug-plan" data-diagnosis-id="${answer.diagnosisId}">保存为修复计划</button></div>`);
                 }
                 appendLastChat = true;
             } else{
@@ -468,16 +492,30 @@
         sendBtn.attr("disabled", true);
     });
 
-    $(document).on('click', '.convert-bug-plan', function () {
-        const diagnosis = chatDrafts[$(this).data('chatUid')];
-        if (!diagnosis || lastChatId == null || stompClient == null) {
-            toastr.error('未找到可转换的 Bug 排查结果或聊天连接未就绪');
-            return;
+    $(document).on('click', '.save-bug-plan', function () {
+        const button = $(this), diagnosisId = button.data('diagnosisId');
+        if (!diagnosisId || !window.confirm('确认根据当前诊断创建修复计划吗？创建后可继续调整步骤。')) return;
+        const storageKey = 'codemateBugPlanIdempotency:' + diagnosisId;
+        let idempotencyKey = sessionStorage.getItem(storageKey);
+        if (!idempotencyKey) {
+            idempotencyKey = 'bug-confirm-' + (window.crypto && crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(16).slice(2));
+            sessionStorage.setItem(storageKey, idempotencyKey);
         }
-        const goal = '根据以下 Bug 排查结果制定可执行修复计划：\\n\\n' + diagnosis.substring(0, 12000);
-        stompClient.send("/app/chat/" + session + "/" + lastChatId, {'s-uid': session}, '__codemate_task_plan__:' + goal);
-        addClientMsg('转为任务计划：根据当前 Bug 排查结果制定修复计划', true);
-        sendBtn.attr("disabled", true);
+        button.prop('disabled', true).text('正在保存…');
+        $.ajax({url: '/bug-diagnosis/api/' + diagnosisId + '/confirm', method: 'POST',
+            contentType: 'application/json', dataType: 'json', data: JSON.stringify({idempotencyKey: idempotencyKey})})
+            .done(function (res) {
+                if (!res || !res.status || res.status.code !== 0 || !res.result || !res.result.planId) {
+                    toastr.error((res && res.status && res.status.msg) || '修复计划创建失败');
+                    button.prop('disabled', false).text('保存为修复计划');
+                    return;
+                }
+                button.replaceWith(`<a class="btn btn-sm btn-primary" href="${res.result.planUrl}">查看修复计划 #${res.result.planId}</a>`);
+                toastr.success('修复计划已创建');
+            }).fail(function (xhr) {
+                toastr.error((xhr.responseJSON && xhr.responseJSON.status && xhr.responseJSON.status.msg) || '网络异常，确认未完成');
+                button.prop('disabled', false).text('保存为修复计划');
+            });
     });
 
     sendBtn.click(function () {

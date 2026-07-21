@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet id="20260719_persistent_memory_1" author="CodeMate">
+        <createTable tableName="ai_chat_memory" remarks="CodeMate persistent conversation memory">
+            <column name="id" type="BIGINT" autoIncrement="true"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="memory_id" type="VARCHAR(160)"><constraints nullable="false"/></column>
+            <column name="user_id" type="BIGINT"><constraints nullable="false"/></column>
+            <column name="chat_id" type="VARCHAR(64)"><constraints nullable="false"/></column>
+            <column name="agent_mode" type="VARCHAR(32)"><constraints nullable="false"/></column>
+            <column name="messages_json" type="LONGTEXT"/>
+            <column name="conversation_summary" type="TEXT"/>
+            <column name="summarized_message_count" type="INT" defaultValueNumeric="0"><constraints nullable="false"/></column>
+            <column name="create_time" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="update_time" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <addUniqueConstraint tableName="ai_chat_memory" columnNames="memory_id" constraintName="uk_ai_chat_memory_id"/>
+        <createIndex tableName="ai_chat_memory" indexName="idx_ai_chat_memory_user_chat">
+            <column name="user_id"/><column name="chat_id"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="20260719_persistent_memory_2" author="CodeMate">
+        <createTable tableName="ai_user_technical_memory" remarks="User-owned long term technical preferences">
+            <column name="id" type="BIGINT" autoIncrement="true"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="user_id" type="BIGINT"><constraints nullable="false"/></column>
+            <column name="memory_type" type="VARCHAR(32)"><constraints nullable="false"/></column>
+            <column name="content" type="VARCHAR(1000)"><constraints nullable="false"/></column>
+            <column name="source_type" type="VARCHAR(32)"><constraints nullable="false"/></column>
+            <column name="source_ref" type="VARCHAR(128)"/>
+            <column name="confidence" type="DECIMAL(5,4)"><constraints nullable="false"/></column>
+            <column name="expires_at" type="DATETIME"/>
+            <column name="create_time" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="update_time" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <createIndex tableName="ai_user_technical_memory" indexName="idx_ai_technical_memory_user_type">
+            <column name="user_id"/><column name="memory_type"/>
+        </createIndex>
+        <createIndex tableName="ai_user_technical_memory" indexName="idx_ai_technical_memory_expiry">
+            <column name="expires_at"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

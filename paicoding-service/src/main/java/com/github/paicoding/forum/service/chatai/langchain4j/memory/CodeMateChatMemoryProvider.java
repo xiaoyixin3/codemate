@@ -7,7 +7,10 @@ import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.ChatMemoryProvider;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
+import dev.langchain4j.store.memory.chat.ChatMemoryStore;
+import dev.langchain4j.store.memory.chat.InMemoryChatMemoryStore;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -20,9 +23,18 @@ import java.util.concurrent.ConcurrentMap;
 public class CodeMateChatMemoryProvider implements ChatMemoryProvider {
     private final ConcurrentMap<Object, ChatMemory> memories = new ConcurrentHashMap<>();
     private final LangChain4jProperties properties;
+    private final ChatMemoryStore chatMemoryStore;
 
+    @Autowired
+    public CodeMateChatMemoryProvider(LangChain4jProperties properties, ChatMemoryStore chatMemoryStore) {
+        this.properties = properties;
+        this.chatMemoryStore = chatMemoryStore;
+    }
+
+    /** Test-friendly constructor; production injects the persistent store. */
     public CodeMateChatMemoryProvider(LangChain4jProperties properties) {
         this.properties = properties;
+        this.chatMemoryStore = new InMemoryChatMemoryStore();
     }
 
     @Override
@@ -31,6 +43,7 @@ public class CodeMateChatMemoryProvider implements ChatMemoryProvider {
                 .id(id)
                 .maxMessages(properties.getMemoryMaxMessages())
                 .alwaysKeepSystemMessageFirst(true)
+                .chatMemoryStore(chatMemoryStore)
                 .build());
     }
 
@@ -58,6 +71,11 @@ public class CodeMateChatMemoryProvider implements ChatMemoryProvider {
 
     public void evict(String memoryId) {
         memories.remove(memoryId);
+    }
+
+    public void evictConversation(Long userId, String chatId) {
+        String prefix = userId + ":" + chatId + ":";
+        memories.keySet().removeIf(id -> String.valueOf(id).startsWith(prefix));
     }
 
     public int activeMemoryCount() {

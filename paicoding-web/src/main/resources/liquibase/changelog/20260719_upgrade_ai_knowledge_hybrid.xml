@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet id="20260719_rag_hybrid_1" author="CodeMate">
+        <addColumn tableName="ai_knowledge_chunk">
+            <column name="heading" type="VARCHAR(256)" afterColumn="title"/>
+            <column name="category" type="VARCHAR(128)" afterColumn="heading"/>
+            <column name="tags" type="VARCHAR(1000)" afterColumn="category"/>
+            <column name="content_type" type="VARCHAR(32)" afterColumn="tags"/>
+            <column name="embedding_dimension" type="INT" afterColumn="embedding_model"/>
+            <column name="index_version" type="VARCHAR(32)" defaultValue="v1" afterColumn="embedding_dimension">
+                <constraints nullable="false"/>
+            </column>
+            <column name="article_updated_at" type="DATETIME" afterColumn="index_version"/>
+            <column name="indexed_at" type="DATETIME" afterColumn="article_updated_at"/>
+        </addColumn>
+        <createIndex tableName="ai_knowledge_chunk" indexName="idx_ai_knowledge_article_hash_version">
+            <column name="article_id"/><column name="content_hash"/><column name="index_version"/>
+        </createIndex>
+        <createIndex tableName="ai_knowledge_chunk" indexName="idx_ai_knowledge_model_version_enabled">
+            <column name="embedding_model"/><column name="index_version"/><column name="enabled"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

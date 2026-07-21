@@ -261,6 +261,40 @@ public class AiTaskPlanServiceImpl implements AiTaskPlanService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public Long addStep(Long userId, Long planId, AiTaskPlanStepCreateReq req) {
+        AiTaskPlanDO plan = getPlanOrThrowForUpdate(userId, planId);
+        if (AiTaskPlanStatusEnum.CANCELED.getCode().equals(plan.getStatus()) || req == null
+                || StringUtils.isBlank(req.getTitle()) || req.getTitle().trim().length() > 256) {
+            throw ExceptionUtil.of(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, "当前计划不能新增该步骤");
+        }
+        List<AiTaskPlanStepDO> existing = aiTaskPlanStepDao.listByPlanIdAndUserId(planId, userId);
+        if (existing.size() >= 100) {
+            throw ExceptionUtil.of(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, "步骤数量不能超过100");
+        }
+        Date now = new Date();
+        AiTaskPlanStepDO step = new AiTaskPlanStepDO();
+        step.setPlanId(planId);
+        step.setUserId(userId);
+        step.setStepNo(existing.size() + 1);
+        step.setTitle(req.getTitle().trim());
+        step.setContent(req.getContent());
+        step.setExpectedOutput(req.getExpectedOutput());
+        step.setRisk(req.getRisk());
+        step.setVerificationMethod(req.getVerificationMethod());
+        step.setStatus(AiTaskPlanStepStatusEnum.TODO.getCode());
+        step.setExecutorType(0);
+        step.setDeleted(YesOrNoEnum.NO.getCode());
+        step.setCreateTime(now);
+        step.setUpdateTime(now);
+        aiTaskPlanStepDao.save(step);
+        plan.setStepTotal(existing.size() + 1);
+        plan.setUpdateTime(now);
+        aiTaskPlanDao.updateById(plan);
+        return step.getId();
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public void reopenPlan(Long userId, Long planId, AiTaskPlanReopenReq req) {
         checkUserId(userId);
         if (req == null || StringUtils.isBlank(req.getReason())) {

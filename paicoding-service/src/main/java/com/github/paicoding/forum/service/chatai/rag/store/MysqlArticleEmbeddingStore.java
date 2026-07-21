@@ -25,6 +25,7 @@ public class MysqlArticleEmbeddingStore implements EmbeddingStore<TextSegment> {
     public static final String ARTICLE_ID = "articleId";
     public static final String ARTICLE_TITLE = "articleTitle";
     public static final String CHUNK_INDEX = "chunkIndex";
+    public static final String ARTICLE_HEADING = "articleHeading";
 
     private final AiKnowledgeChunkDao chunkDao;
     private final RagProperties properties;
@@ -63,7 +64,8 @@ public class MysqlArticleEmbeddingStore implements EmbeddingStore<TextSegment> {
         double[] query = request.queryEmbedding().vectorAsDoubleArray();
         int candidateLimit = Math.max(request.maxResults(), Math.min(properties.getMaxCandidateChunks(), 10000));
         List<EmbeddingMatch<TextSegment>> matches = new ArrayList<>();
-        for (AiKnowledgeChunkDO chunk : chunkDao.listCandidates(properties.getEmbeddingModel(), candidateLimit)) {
+        for (AiKnowledgeChunkDO chunk : chunkDao.listCandidates(properties.getEmbeddingModel(),
+                properties.getIndexVersion(), candidateLimit)) {
             Embedding embedding = readEmbedding(chunk.getEmbedding());
             double score = VectorSimilarity.cosine(query, embedding.vectorAsDoubleArray());
             if (score >= request.minScore()) {
