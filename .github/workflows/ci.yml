@@ -17,7 +17,9 @@ jobs:
         run: bash -n deploy.sh
 
       - name: Validate production Compose configuration
-        run: docker compose --env-file deploy/.env.production.example -f deploy/docker-compose.prod.yml config --quiet
+        run: |
+          cp deploy/.env.production.example deploy/.env
+          docker compose --env-file deploy/.env -f deploy/docker-compose.prod.yml config --quiet
 
   agent-workbench-e2e:
     runs-on: ubuntu-latest
