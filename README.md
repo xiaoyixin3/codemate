@@ -106,6 +106,7 @@ paicoding
 - [Agent 离线评估](codemate-docs/docs/10-CodeMate-agent-evaluation.md)
 - [Agent 工作台](codemate-docs/docs/11-CodeMate-agent-workbench.md)
 - [Agent 可复现演示](codemate-docs/docs/12-CodeMate-reproducible-demo.md)
+- [面试演示与答辩指南](codemate-docs/docs/13-CodeMate-interview-guide.md)
 
 ### Agent 演示预检
 
