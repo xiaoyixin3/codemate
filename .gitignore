@@ -61,6 +61,7 @@ paicoding-web/src/main/java/com/github/paicoding/forum/web/javabetter/top/image/
 .env
 .env.*
 !.env.example
+!deploy/.env.production.example
 deploy/.env
 
 # Local Codex/GitHub publishing credentials and generated artifacts
