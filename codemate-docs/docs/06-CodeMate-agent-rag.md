@@ -77,4 +77,4 @@ RAG_FRESHNESS_WEIGHT=0.10
 
 管理员调试接口 `GET /api/admin/ai/rag/search?question=...&limit=10` 返回向量分、关键词分、新鲜度分、最终分和排序原因；`GET /api/admin/ai/rag/status` 返回当前索引版本、候选上限和有效分块数。运行指标包括检索耗时、两路候选规模、结果数、索引更新/跳过次数和实际生成向量数。
 
-固定 50 条评测数据及结果位于 `paicoding-service/src/test/resources/codemate/rag-eval-v1.csv` 和 `codemate-docs/evaluation/rag-v2-report.*`。
+固定 50 条评测数据及结果位于 `codemate-service/src/test/resources/codemate/rag-eval-v1.csv` 和 `codemate-docs/evaluation/rag-v2-report.*`。

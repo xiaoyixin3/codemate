@@ -85,8 +85,8 @@ Micrometer 指标包括：
 默认测试不调用外部付费模型：
 
 ```bash
-mvn -pl paicoding-service -am "-Dtest=ChatModelProviderRegistryTest,ModelFailureClassifierTest,AgentFallbackPolicyTest,StreamTimeoutPolicyTest" "-Dsurefire.failIfNoSpecifiedTests=false" test
-mvn -pl paicoding-service -am test
+mvn -pl codemate-service -am "-Dtest=ChatModelProviderRegistryTest,ModelFailureClassifierTest,AgentFallbackPolicyTest,StreamTimeoutPolicyTest" "-Dsurefire.failIfNoSpecifiedTests=false" test
+mvn -pl codemate-service -am test
 mvn clean install -DskipTests=true
 ```
 

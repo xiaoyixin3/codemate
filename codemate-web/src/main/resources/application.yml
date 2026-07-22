@@ -38,7 +38,8 @@ servlet:
   tomcat:
     max-swallow-size: -1
 security:
-  salt: ${PAICODING_SECURITY_SALT:}
+  # Prefer the CodeMate variable while accepting the legacy name during migration.
+  salt: ${CODEMATE_SECURITY_SALT:${PAICODING_SECURITY_SALT:}}
   salt-index: 3
 paicoding:
   sensitive:

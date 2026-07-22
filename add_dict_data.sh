@@ -62,8 +62,8 @@ CURRENT_DATE=$(date +%Y%m%d)
 CURRENT_DATETIME=$(date +"%Y-%m-%d %H:%M:%S")
 
 # 定义文件路径
-DATA_FILE="paicoding-web/src/main/resources/liquibase/data/init_data_${CURRENT_DATE}.sql"
-CHANGELOG_FILE="paicoding-web/src/main/resources/liquibase/changelog/000_initial_schema.xml"
+DATA_FILE="codemate-web/src/main/resources/liquibase/data/init_data_${CURRENT_DATE}.sql"
+CHANGELOG_FILE="codemate-web/src/main/resources/liquibase/changelog/000_initial_schema.xml"
 
 echo ""
 echo "即将添加以下字典数据："

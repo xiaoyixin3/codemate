@@ -4,11 +4,11 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
     <modules>
-        <module>paicoding-ui</module>
-        <module>paicoding-web</module>
-        <module>paicoding-service</module>
-        <module>paicoding-core</module>
-        <module>paicoding-api</module>
+        <module>codemate-ui</module>
+        <module>codemate-web</module>
+        <module>codemate-service</module>
+        <module>codemate-core</module>
+        <module>codemate-api</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -17,7 +17,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.github.paicoding.forum</groupId>
-    <artifactId>paicoding-forum</artifactId>
+    <artifactId>codemate-forum</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>CodeMate</name>
     <description>CodeMate developer community built with Java and Spring Boot</description>
@@ -57,25 +57,25 @@
             </dependency>
             <dependency>
                 <groupId>com.github.paicoding.forum</groupId>
-                <artifactId>paicoding-api</artifactId>
+                <artifactId>codemate-api</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.github.paicoding.forum</groupId>
-                <artifactId>paicoding-ui</artifactId>
+                <artifactId>codemate-ui</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.github.paicoding.forum</groupId>
-                <artifactId>paicoding-service</artifactId>
+                <artifactId>codemate-service</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
 
             <dependency>
                 <groupId>com.github.paicoding.forum</groupId>
-                <artifactId>paicoding-core</artifactId>
+                <artifactId>codemate-core</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
 

@@ -146,18 +146,18 @@ Bug 模式的完整生命周期如下：
 ## 验证命令
 
 ```bash
-mvn -pl paicoding-service -am test
+mvn -pl codemate-service -am test
 mvn clean install -DskipTests=true
 ```
 
 第三阶段定向验证：
 
 ```bash
-mvn -pl paicoding-service "-Dtest=BugDiagnosisServiceImplTest,TaskPlanWriteServiceImplTest,AgentRunStateMachineTest,AgentRunServiceImplTest" test
+mvn -pl codemate-service "-Dtest=BugDiagnosisServiceImplTest,TaskPlanWriteServiceImplTest,AgentRunStateMachineTest,AgentRunServiceImplTest" test
 ```
 
 第四阶段 RAG 验证：
 
 ```bash
-mvn -pl paicoding-service -am "-Dtest=RagChunkerTest,KnowledgeRagServiceTest,HybridContentRetrieverTest,ArticleRagIndexListenerTest,RagOfflineEvaluatorTest,VectorSimilarityTest" "-Dsurefire.failIfNoSpecifiedTests=false" test
+mvn -pl codemate-service -am "-Dtest=RagChunkerTest,KnowledgeRagServiceTest,HybridContentRetrieverTest,ArticleRagIndexListenerTest,RagOfflineEvaluatorTest,VectorSimilarityTest" "-Dsurefire.failIfNoSpecifiedTests=false" test
 ```

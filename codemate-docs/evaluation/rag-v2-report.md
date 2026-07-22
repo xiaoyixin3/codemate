@@ -1,6 +1,6 @@
 # CodeMate RAG v2 离线对比
 
-数据集：`paicoding-service/src/test/resources/codemate/rag-eval-v1.csv`，共 50 条固定站内技术问答。评测不调用外部模型，用于检索排序回归和报告链路验证。
+数据集：`codemate-service/src/test/resources/codemate/rag-eval-v1.csv`，共 50 条固定站内技术问答。评测不调用外部模型，用于检索排序回归和报告链路验证。
 
 | 策略 | Recall@3 | Recall@5 | MRR | 引用合法率 | 平均耗时 |
 | --- | ---: | ---: | ---: | ---: | ---: |

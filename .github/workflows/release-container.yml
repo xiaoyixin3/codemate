@@ -27,12 +27,12 @@ jobs:
           cache: maven
 
       - name: Build production JAR
-        run: mvn --batch-mode --no-transfer-progress -pl paicoding-web -am package -DskipTests -Pprod
+        run: mvn --batch-mode --no-transfer-progress -pl codemate-web -am package -DskipTests -Pprod
 
       - name: Prepare container context
         run: |
           mkdir -p release
-          cp paicoding-web/target/paicoding-web-0.0.1-SNAPSHOT.jar release/codemate.jar
+          cp codemate-web/target/codemate-web-0.0.1-SNAPSHOT.jar release/codemate.jar
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v4

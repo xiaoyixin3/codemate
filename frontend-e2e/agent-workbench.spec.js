@@ -4,9 +4,9 @@ const {test, expect} = require('playwright/test');
 
 const root = path.resolve(__dirname, '..');
 const fixture = fs.readFileSync(path.join(__dirname, 'fixtures', 'agent-workbench.html'), 'utf8');
-const jquery = fs.readFileSync(path.join(root, 'paicoding-ui/src/main/resources/static/js/jquery.min.js'), 'utf8');
-const workbench = fs.readFileSync(path.join(root, 'paicoding-ui/src/main/resources/static/js/views/chat-agent-workbench.js'), 'utf8');
-const styles = fs.readFileSync(path.join(root, 'paicoding-ui/src/main/resources/static/css/views/chat-home.css'), 'utf8');
+const jquery = fs.readFileSync(path.join(root, 'codemate-ui/src/main/resources/static/js/jquery.min.js'), 'utf8');
+const workbench = fs.readFileSync(path.join(root, 'codemate-ui/src/main/resources/static/js/views/chat-agent-workbench.js'), 'utf8');
+const styles = fs.readFileSync(path.join(root, 'codemate-ui/src/main/resources/static/css/views/chat-home.css'), 'utf8');
 
 const runs = [
     {runId: 101, goal: '定位支付超时', mode: 'BUG_DIAGNOSIS', status: 'FAILED', startTime: '2026-07-22T10:00:00Z'},

@@ -71,7 +71,7 @@ Controller / Service 获取当前用户 ID
 对应 Controller：
 
 ```text
-paicoding-web/src/main/java/com/github/paicoding/forum/web/front/login/pwd/LoginRestController.java
+codemate-web/src/main/java/com/github/paicoding/forum/web/front/login/pwd/LoginRestController.java
 ```
 
 | 接口 | 方法 | 是否登录 | 说明 |
@@ -156,8 +156,8 @@ POST /login/register
 对应 Controller：
 
 ```text
-paicoding-web/src/main/java/com/github/paicoding/forum/web/front/article/rest/ArticleRestController.java
-paicoding-web/src/main/java/com/github/paicoding/forum/web/front/article/rest/ArticleListRestController.java
+codemate-web/src/main/java/com/github/paicoding/forum/web/front/article/rest/ArticleRestController.java
+codemate-web/src/main/java/com/github/paicoding/forum/web/front/article/rest/ArticleListRestController.java
 ```
 
 | 接口 | 方法 | 是否登录 | 说明 |
@@ -238,7 +238,7 @@ GET /article/api/favor?articleId=文章ID&type=操作类型
 对应 Controller：
 
 ```text
-paicoding-web/src/main/java/com/github/paicoding/forum/web/front/comment/rest/CommentRestController.java
+codemate-web/src/main/java/com/github/paicoding/forum/web/front/comment/rest/CommentRestController.java
 ```
 
 | 接口 | 方法 | 是否登录 | 说明 |
@@ -308,7 +308,7 @@ GET /comment/api/favor?commentId=评论ID&type=操作类型
 对应 Controller：
 
 ```text
-paicoding-web/src/main/java/com/github/paicoding/forum/web/front/user/rest/UserRestController.java
+codemate-web/src/main/java/com/github/paicoding/forum/web/front/user/rest/UserRestController.java
 ```
 
 | 接口 | 方法 | 是否登录 | 说明 |
@@ -368,7 +368,7 @@ GET /user/api/followList?userId=用户ID&followSelectType=类型&page=1&pageSize
 对应 Controller：
 
 ```text
-paicoding-web/src/main/java/com/github/paicoding/forum/web/front/notice/rest/NoticeRestController.java
+codemate-web/src/main/java/com/github/paicoding/forum/web/front/notice/rest/NoticeRestController.java
 ```
 
 | 接口 | 方法 | 是否登录 | 说明 |
@@ -406,7 +406,7 @@ paicoding-web/src/main/java/com/github/paicoding/forum/web/front/notice/rest/Not
 对应 Controller：
 
 ```text
-paicoding-web/src/main/java/com/github/paicoding/forum/web/front/search/rest/SearchRestController.java
+codemate-web/src/main/java/com/github/paicoding/forum/web/front/search/rest/SearchRestController.java
 ```
 
 | 接口 | 方法 | 是否登录 | 说明 |
@@ -437,7 +437,7 @@ GET /search/api/list?key=关键词&page=1&size=10
 对应 Controller：
 
 ```text
-paicoding-web/src/main/java/com/github/paicoding/forum/web/front/rank/RankController.java
+codemate-web/src/main/java/com/github/paicoding/forum/web/front/rank/RankController.java
 ```
 
 | 接口 | 方法 | 是否登录 | 说明 |

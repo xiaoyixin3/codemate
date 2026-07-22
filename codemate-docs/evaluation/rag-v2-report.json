@@ -1,5 +1,5 @@
 {
-  "dataset": "paicoding-service/src/test/resources/codemate/rag-eval-v1.csv",
+  "dataset": "codemate-service/src/test/resources/codemate/rag-eval-v1.csv",
   "datasetSize": 50,
   "generatedBy": "RagOfflineEvaluatorTest",
   "baseline": {
