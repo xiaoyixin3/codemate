@@ -10,11 +10,20 @@ import org.springframework.stereotype.Component;
 public class LangChain4jProperties {
     private boolean enabled = true;
     private boolean fallbackEnabled = true;
+    /** Active provider: deepseek or openai-compatible. */
+    private String provider = "deepseek";
     private String baseUrl = "https://api.deepseek.com/v1";
     private String apiKey;
     private String chatModel = "deepseek-chat";
+    private int contextWindowTokens = 64000;
+    private String openAiBaseUrl = "https://api.openai.com/v1";
+    private String openAiApiKey;
+    private String openAiChatModel = "gpt-4o-mini";
+    private int openAiContextWindowTokens = 128000;
     private double temperature = 0.2D;
     private int timeoutSeconds = 120;
+    private int firstTokenTimeoutSeconds = 20;
+    private int totalResponseTimeoutSeconds = 120;
     private int memoryMaxMessages = 20;
     private int memorySummaryMaxChars = 4000;
     private int memoryPreferenceMaxItems = 20;
@@ -31,6 +40,10 @@ public class LangChain4jProperties {
     private boolean logResponses;
 
     public boolean isAvailable() {
-        return enabled && apiKey != null && !apiKey.trim().isEmpty();
+        return enabled && activeApiKey() != null && !activeApiKey().trim().isEmpty();
+    }
+
+    public String activeApiKey() {
+        return "openai-compatible".equalsIgnoreCase(provider) ? openAiApiKey : apiKey;
     }
 }

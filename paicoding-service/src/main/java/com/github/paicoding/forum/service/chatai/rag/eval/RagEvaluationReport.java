@@ -10,4 +10,6 @@ public class RagEvaluationReport {
     private double mrr;
     private double citationLegalRate;
     private double averageLatencyMillis;
+    private int noEvidenceCaseCount;
+    private double noEvidenceRefusalRate;
 }

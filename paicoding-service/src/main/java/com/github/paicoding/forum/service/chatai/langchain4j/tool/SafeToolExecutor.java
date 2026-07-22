@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.paicoding.forum.service.chatai.langchain4j.config.LangChain4jProperties;
 import com.github.paicoding.forum.service.agentrun.service.AgentRunToolRecorder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
@@ -28,6 +29,7 @@ public class SafeToolExecutor {
     private final ExecutorService executor;
     private final AgentRunToolRecorder traceRecorder;
 
+    @Autowired
     public SafeToolExecutor(ObjectMapper objectMapper, LangChain4jProperties properties, ToolMetrics metrics,
                             AgentRunToolRecorder traceRecorder) {
         this(objectMapper, properties, metrics, traceRecorder,

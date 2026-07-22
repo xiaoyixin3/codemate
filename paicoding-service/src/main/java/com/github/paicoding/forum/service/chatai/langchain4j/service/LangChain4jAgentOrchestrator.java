@@ -9,6 +9,13 @@ import com.github.paicoding.forum.service.chatai.langchain4j.config.LangChain4jP
 import com.github.paicoding.forum.service.chatai.langchain4j.memory.CodeMateChatMemoryProvider;
 import com.github.paicoding.forum.service.chatai.memory.MemoryContextAssembler;
 import com.github.paicoding.forum.service.chatai.langchain4j.observability.AgentMetrics;
+import com.github.paicoding.forum.service.chatai.langchain4j.model.ChatModelProvider;
+import com.github.paicoding.forum.service.chatai.langchain4j.model.ChatModelProviderRegistry;
+import com.github.paicoding.forum.service.chatai.langchain4j.reliability.AgentFallbackPolicy;
+import com.github.paicoding.forum.service.chatai.langchain4j.reliability.ModelFailureClassifier;
+import com.github.paicoding.forum.service.chatai.langchain4j.reliability.ModelFailureType;
+import com.github.paicoding.forum.service.chatai.langchain4j.reliability.StreamTimeoutException;
+import com.github.paicoding.forum.service.chatai.langchain4j.reliability.StreamTimeoutPolicy;
 import com.github.paicoding.forum.service.chatai.langchain4j.tool.CodeMateTool;
 import com.github.paicoding.forum.service.chatai.langchain4j.tool.TrustedToolContextRegistry;
 import com.github.paicoding.forum.service.agentrun.service.AgentRunContextRegistry;
@@ -25,6 +32,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.EnumMap;
@@ -33,6 +41,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -54,8 +66,17 @@ public class LangChain4jAgentOrchestrator {
     private final AgentModeRegistry modeRegistry;
     private final AgentMetrics metrics;
     private final MemoryContextAssembler memoryContextAssembler;
+    private final ChatModelProviderRegistry providerRegistry;
+    private final ModelFailureClassifier failureClassifier;
+    private final AgentFallbackPolicy fallbackPolicy;
+    private final StreamTimeoutPolicy timeoutPolicy;
     private final Map<AgentMode, CodeMateStreamingAssistant> assistants = new EnumMap<>(AgentMode.class);
     private final ConcurrentMap<String, AtomicBoolean> conversationBusy = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService timeoutExecutor = Executors.newScheduledThreadPool(2, runnable -> {
+        Thread thread = new Thread(runnable, "codemate-model-timeout");
+        thread.setDaemon(true);
+        return thread;
+    });
 
     public LangChain4jAgentOrchestrator(LangChain4jProperties properties,
                                         @Qualifier("codeMateStreamingChatModel") StreamingChatModel streamingChatModel,
@@ -67,7 +88,11 @@ public class LangChain4jAgentOrchestrator {
                                         AgentRunService agentRunService,
                                         AgentModeRegistry modeRegistry,
                                         AgentMetrics metrics,
-                                        MemoryContextAssembler memoryContextAssembler) {
+                                        MemoryContextAssembler memoryContextAssembler,
+                                        ChatModelProviderRegistry providerRegistry,
+                                        ModelFailureClassifier failureClassifier,
+                                        AgentFallbackPolicy fallbackPolicy,
+                                        StreamTimeoutPolicy timeoutPolicy) {
         this.properties = properties;
         this.streamingChatModel = streamingChatModel;
         this.memoryProvider = memoryProvider;
@@ -79,11 +104,15 @@ public class LangChain4jAgentOrchestrator {
         this.modeRegistry = modeRegistry;
         this.metrics = metrics;
         this.memoryContextAssembler = memoryContextAssembler;
+        this.providerRegistry = providerRegistry;
+        this.failureClassifier = failureClassifier;
+        this.fallbackPolicy = fallbackPolicy;
+        this.timeoutPolicy = timeoutPolicy;
     }
 
     @PostConstruct
     public void initialize() {
-        assistants.put(AgentMode.CHAT, buildAssistant(BASE_PROMPT, true, false, true));
+        assistants.put(AgentMode.CHAT, buildAssistant(BASE_PROMPT, true, false, false));
         assistants.put(AgentMode.BUG_DIAGNOSIS,
                 buildAssistant(modeRegistry.get(AgentMode.BUG_DIAGNOSIS).systemPrompt(), true, true, false));
         assistants.put(AgentMode.TASK_PLANNING,
@@ -93,11 +122,24 @@ public class LangChain4jAgentOrchestrator {
     }
 
     public boolean isAvailable() {
-        return properties.isAvailable();
+        try {
+            ChatModelProvider provider = providerRegistry.active();
+            return properties.isEnabled() && provider.isAvailable() && provider.capabilities().isStreaming();
+        } catch (RuntimeException e) {
+            return false;
+        }
     }
 
     public boolean isFallbackEnabled() {
         return properties.isFallbackEnabled();
+    }
+
+    public String activeProviderName() {
+        return providerRegistry.active().name();
+    }
+
+    public String activeModelName() {
+        return providerRegistry.active().modelName();
     }
 
     public void stream(AgentMode mode,
@@ -108,9 +150,8 @@ public class LangChain4jAgentOrchestrator {
                        List<ChatItemVo> history,
                        ChatItemVo current,
                        AgentStreamObserver observer) {
-        if (!isAvailable()) {
-            throw new IllegalStateException("LangChain4j is disabled or the DeepSeek API key is missing");
-        }
+        ChatModelProvider provider = providerRegistry.requireAvailable();
+        if (!provider.capabilities().isStreaming()) throw new IllegalStateException("Active provider does not support streaming");
         CodeMateStreamingAssistant assistant = assistants.get(mode);
         if (assistant == null) {
             throw new IllegalArgumentException("Unsupported LangChain4j agent mode: " + mode);
@@ -125,36 +166,92 @@ public class LangChain4jAgentOrchestrator {
             toolContextRegistry.bind(memoryId, userId);
             runContextRegistry.bind(memoryId, runId);
             memoryProvider.seedIfEmpty(memoryId, history, current);
-            metrics.request(mode);
+            metrics.request(mode, provider.name());
             String systemPrompt = memoryContextAssembler.assemble(systemPrompt(mode), userId, memoryId);
+            startAttempt(mode, memoryId, runId, systemPrompt, input, current, observer, busy, startedAt, provider.name());
+        } catch (RuntimeException e) {
+            metrics.error(mode, provider.name(), failureClassifier.classify(e));
+            release(memoryId, busy);
+            throw e;
+        }
+    }
+
+    private void startAttempt(AgentMode mode, String memoryId, Long runId, String systemPrompt, String input,
+                              ChatItemVo current, AgentStreamObserver observer, AtomicBoolean busy,
+                              Instant requestStartedAt, String providerName) {
+        CodeMateStreamingAssistant assistant = assistants.get(mode);
+        if (assistant == null) throw new IllegalArgumentException("Unsupported fallback mode: " + mode);
+        Instant attemptStartedAt = Instant.now();
+        AtomicBoolean finished = new AtomicBoolean();
+        AtomicBoolean firstToken = new AtomicBoolean();
+        long remainingMillis = timeoutPolicy.remainingTotalMillis(requestStartedAt, attemptStartedAt);
+        ScheduledFuture<?> firstTokenTimeout = timeoutExecutor.schedule(
+                () -> failAttempt(mode, memoryId, runId, systemPrompt, input, current, observer, busy,
+                        requestStartedAt, providerName, finished,
+                        new StreamTimeoutException("FIRST_TOKEN_TIMEOUT")),
+                timeoutPolicy.firstTokenTimeoutMillis(remainingMillis),
+                TimeUnit.MILLISECONDS);
+        ScheduledFuture<?> totalTimeout = timeoutExecutor.schedule(
+                () -> failAttempt(mode, memoryId, runId, systemPrompt, input, current, observer, busy,
+                        requestStartedAt, providerName, finished,
+                        new StreamTimeoutException("TOTAL_RESPONSE_TIMEOUT")),
+                remainingMillis, TimeUnit.MILLISECONDS);
+        try {
             TokenStream stream = assistant.chat(memoryId, systemPrompt, input);
-            stream.onPartialResponse(observer::onToken)
+            stream.onPartialResponse(token -> {
+                        if (finished.get()) return;
+                        if (firstToken.compareAndSet(false, true)) {
+                            firstTokenTimeout.cancel(false);
+                            metrics.firstToken(mode, providerName, Duration.between(attemptStartedAt, Instant.now()));
+                        }
+                        observer.onToken(token);
+                    })
                     .onRetrieved(contents -> {
+                        if (finished.get()) return;
                         metrics.retrieved(mode, contents.size());
                         recordEvidence(runId, contents);
                         attachCitations(current, contents);
                         observer.onRetrieved(contents);
                     })
                     .onToolExecuted(execution -> {
+                        if (finished.get()) return;
                         metrics.toolExecuted(mode, execution.hasFailed());
                         observer.onToolExecuted(execution);
                     })
                     .onCompleteResponse(response -> {
-                        metrics.success(mode, Duration.between(startedAt, Instant.now()), response.tokenUsage());
+                        if (!finished.compareAndSet(false, true)) return;
+                        firstTokenTimeout.cancel(false);
+                        totalTimeout.cancel(false);
+                        metrics.success(mode, providerName, Duration.between(attemptStartedAt, Instant.now()), response.tokenUsage());
                         release(memoryId, busy);
                         observer.onComplete(response);
                     })
-                    .onError(error -> {
-                        metrics.error(mode);
-                        release(memoryId, busy);
-                        observer.onError(error);
-                    })
+                    .onError(error -> failAttempt(mode, memoryId, runId, systemPrompt, input, current, observer,
+                            busy, requestStartedAt, providerName, finished, error))
                     .start();
         } catch (RuntimeException e) {
-            metrics.error(mode);
-            release(memoryId, busy);
-            throw e;
+            failAttempt(mode, memoryId, runId, systemPrompt, input, current, observer, busy,
+                    requestStartedAt, providerName, finished, e);
         }
+    }
+
+    private void failAttempt(AgentMode mode, String memoryId, Long runId, String systemPrompt, String input,
+                             ChatItemVo current, AgentStreamObserver observer, AtomicBoolean busy,
+                             Instant requestStartedAt, String providerName, AtomicBoolean finished, Throwable error) {
+        if (!finished.compareAndSet(false, true)) return;
+        ModelFailureType failureType = failureClassifier.classify(error);
+        metrics.error(mode, providerName, failureType);
+        AgentFallbackPolicy.Fallback fallback = properties.isFallbackEnabled()
+                && failureType != ModelFailureType.BUSINESS ? fallbackPolicy.next(mode) : null;
+        if (fallback != null) {
+            metrics.fallback(mode, fallback.getMode(), providerName);
+            observer.onFallback(fallback.getUserNotice());
+            startAttempt(fallback.getMode(), memoryId, runId, systemPrompt(fallback.getMode()), input,
+                    current, observer, busy, requestStartedAt, providerName);
+            return;
+        }
+        release(memoryId, busy);
+        observer.onError(error);
     }
 
     public void evictMemory(Long userId, String chatId, AgentMode mode) {
@@ -168,7 +265,7 @@ public class LangChain4jAgentOrchestrator {
                 .chatMemoryProvider(memoryProvider)
                 .storeRetrievedContentInChatMemory(false)
                 .maxToolCallingRoundTrips(properties.getMaxToolRoundTrips());
-        if (tools) {
+        if (tools && providerRegistry.active().capabilities().isToolCalling()) {
             builder.tools(this.tools.stream()
                     .filter(tool -> allowWriteTools || tool.riskLevel() == com.github.paicoding.forum.service.chatai.langchain4j.tool.ToolRiskLevel.READ_ONLY)
                     .map(tool -> (Object) tool).collect(java.util.stream.Collectors.toList()));
@@ -189,6 +286,11 @@ public class LangChain4jAgentOrchestrator {
         runContextRegistry.unbind(memoryId);
         busy.set(false);
         conversationBusy.remove(memoryId, busy);
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        timeoutExecutor.shutdownNow();
     }
 
     private void recordEvidence(Long runId, List<Content> contents) {

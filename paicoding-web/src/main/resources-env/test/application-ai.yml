@@ -45,11 +45,19 @@ codemate:
   langchain4j:
     enabled: ${LANGCHAIN4J_ENABLED:true}
     fallback-enabled: ${LANGCHAIN4J_FALLBACK_ENABLED:true}
+    provider: ${AGENT_MODEL_PROVIDER:deepseek}
     base-url: ${DEEPSEEK_API_HOST:https://api.deepseek.com/v1}
     api-key: ${DEEPSEEK_API_KEY:}
     chat-model: ${DEEPSEEK_MODEL:deepseek-chat}
+    context-window-tokens: ${DEEPSEEK_CONTEXT_WINDOW_TOKENS:64000}
+    open-ai-base-url: ${OPENAI_COMPATIBLE_BASE_URL:https://api.openai.com/v1}
+    open-ai-api-key: ${OPENAI_COMPATIBLE_API_KEY:}
+    open-ai-chat-model: ${OPENAI_COMPATIBLE_MODEL:gpt-4o-mini}
+    open-ai-context-window-tokens: ${OPENAI_COMPATIBLE_CONTEXT_WINDOW_TOKENS:128000}
     temperature: ${AGENT_TEMPERATURE:0.2}
     timeout-seconds: ${AGENT_TIMEOUT_SECONDS:120}
+    first-token-timeout-seconds: ${AGENT_FIRST_TOKEN_TIMEOUT_SECONDS:20}
+    total-response-timeout-seconds: ${AGENT_TOTAL_RESPONSE_TIMEOUT_SECONDS:120}
     memory-max-messages: ${AGENT_MEMORY_MAX_MESSAGES:20}
     memory-summary-max-chars: ${AGENT_MEMORY_SUMMARY_MAX_CHARS:4000}
     memory-preference-max-items: ${AGENT_MEMORY_PREFERENCE_MAX_ITEMS:20}
@@ -82,3 +90,6 @@ codemate:
     keyword-weight: ${RAG_KEYWORD_WEIGHT:0.25}
     freshness-weight: ${RAG_FRESHNESS_WEIGHT:0.10}
     debug-max-results: 20
+  evaluation:
+    fixed-random-seed: ${AGENT_EVAL_RANDOM_SEED:20260722}
+    external-model-enabled: ${AGENT_EVAL_EXTERNAL_MODEL_ENABLED:false}

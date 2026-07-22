@@ -19,7 +19,10 @@ import org.springframework.context.annotation.Configuration;
         "com.github.paicoding.forum.service.notify.repository.mapper",
         "com.github.paicoding.forum.service.shortlink.repository.mapper",
         "com.github.paicoding.forum.service.taskplan.repository.mapper",
-        "com.github.paicoding.forum.service.chatai.rag.repository.mapper"
+        "com.github.paicoding.forum.service.chatai.rag.repository.mapper",
+        "com.github.paicoding.forum.service.chatai.memory.repository.mapper",
+        "com.github.paicoding.forum.service.agentrun.repository.mapper",
+        "com.github.paicoding.forum.service.bugdiagnosis.repository.mapper"
 })
 public class ServiceAutoConfig {
 

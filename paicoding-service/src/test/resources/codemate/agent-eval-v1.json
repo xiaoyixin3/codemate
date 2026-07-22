@@ -1,0 +1,53 @@
+{
+  "version": "agent-eval-v1",
+  "randomSeed": 20260722,
+  "noEvidenceCases": [
+    {"id": "rag-no-evidence-1", "latencyMillis": 4, "refused": true},
+    {"id": "rag-no-evidence-2", "latencyMillis": 5, "refused": false}
+  ],
+  "taskPlanning": [
+    {
+      "id": "plan-valid",
+      "expectedMinimumSteps": 2,
+      "stateTransitions": ["CREATED>PLANNING", "PLANNING>EXECUTING", "EXECUTING>COMPLETED"],
+      "output": {
+        "title": "修复缓存击穿",
+        "goal": "避免热点缓存失效时压垮数据库",
+        "scope": "缓存读取链路",
+        "summary": "增加互斥重建与回归验证",
+        "steps": [
+          {"stepNumber": 1, "title": "复现", "description": "构造热点过期", "expectedOutput": "稳定复现", "validationMethod": "检查并发请求日志", "riskNote": "仅在测试环境执行"},
+          {"stepNumber": 2, "title": "修复并验证", "description": "加入互斥重建", "expectedOutput": "数据库请求受控", "validationMethod": "运行并发回归测试", "riskNote": "关注锁超时"}
+        ],
+        "risks": ["锁竞争"],
+        "validationMethods": ["并发测试"],
+        "acceptanceCriteria": ["数据库峰值受控"]
+      }
+    },
+    {
+      "id": "plan-invalid",
+      "expectedMinimumSteps": 1,
+      "stateTransitions": ["COMPLETED>EXECUTING"],
+      "output": "not-json"
+    }
+  ],
+  "toolCalling": [
+    {"id": "tool-1", "expectedTool": "searchPublishedArticles", "selectedTool": "searchPublishedArticles", "parametersValid": true, "invocationSucceeded": true, "duplicateInvocation": false, "unauthorizedAttempt": false, "unauthorizedBlocked": false},
+    {"id": "tool-2", "expectedTool": "getCurrentUserTaskPlan", "selectedTool": "getCurrentUserTaskPlan", "parametersValid": true, "invocationSucceeded": true, "duplicateInvocation": false, "unauthorizedAttempt": true, "unauthorizedBlocked": true},
+    {"id": "tool-3", "expectedTool": "getPublishedArticle", "selectedTool": "searchPublishedArticles", "parametersValid": false, "invocationSucceeded": false, "duplicateInvocation": true, "unauthorizedAttempt": false, "unauthorizedBlocked": false}
+  ],
+  "bugDiagnosis": [
+    {
+      "id": "bug-valid",
+      "output": {
+        "problemSummary": "事务未生效",
+        "causeHypotheses": [{"hypothesis": "发生了类内自调用", "supportingEvidence": ["调用未经过代理"], "confidence": 0.9}],
+        "supportingEvidence": [{"articleId": 1, "title": "Spring 事务代理", "excerpt": "类内调用不会经过代理"}],
+        "verificationSteps": ["检查调用栈与代理类型"],
+        "fixSuggestions": ["将事务方法移动到独立 Bean"],
+        "regressionPlan": ["增加事务回滚集成测试"]
+      }
+    },
+    {"id": "bug-invalid", "output": "not-json"}
+  ]
+}

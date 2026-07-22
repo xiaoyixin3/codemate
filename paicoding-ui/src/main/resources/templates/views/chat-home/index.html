@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="/css/views/chat-home.css" th:href="${global.siteInfo.oss + '/css/views/chat-home.css'}"/>
 
 <script src="/js/stomp.min.js" th:src="${global.siteInfo.oss + '/js/stomp.min.js'}"></script>
+<script src="/js/views/chat-agent-workbench.js" th:src="${global.siteInfo.oss + '/js/views/chat-agent-workbench.js'}"></script>
 
 <body id="body" class="bg-color">
 <!-- 导航栏 -->
@@ -41,6 +42,8 @@
                 </div>
     <!-- 可选模型包含 OpenAI、讯飞星火、CodeMate、DeepSeek、通义千问、智谱清言和豆包。 -->
                 <div class="chat-type">
+                    <button type="button" class="btn btn-sm btn-outline-secondary mr-2" id="agent-workbench-toggle"
+                            aria-controls="agent-workbench" aria-expanded="false">Agent 工作台</button>
                     <a class="btn btn-sm btn-outline-secondary mr-2" href="/task-plan">我的任务计划</a>
                     <button type="button" class="btn btn-sm btn-outline-primary mr-2" id="agent-plan-btn">任务规划 Agent</button>
                     <select class="styled-dropdown mr-2" id="agent-mode" aria-label="CodeMate Agent mode">
@@ -67,6 +70,45 @@
                 </button>
             </div>
         </div>
+        <aside class="agent-workbench" id="agent-workbench" aria-label="Agent Run 工作台">
+            <div class="agent-workbench-header">
+                <div><strong>Agent 工作台</strong><small>运行状态、工具步骤与引用证据</small></div>
+                <div class="agent-workbench-header-actions">
+                    <button type="button" id="agent-refresh-runs" title="刷新 Agent Run">刷新</button>
+                    <button type="button" id="agent-workbench-close" title="关闭工作台" aria-label="关闭 Agent 工作台">×</button>
+                </div>
+            </div>
+            <div class="agent-stream-state" id="agent-stream-state" data-state="idle" role="status" aria-live="polite">
+                <span class="agent-stream-dot"></span><span class="agent-stream-state-text">尚未连接</span>
+            </div>
+            <div class="agent-workbench-message" id="agent-workbench-message" role="alert" style="display:none"></div>
+            <section class="agent-workbench-section agent-current-section">
+                <div class="agent-section-heading"><span>当前 Run</span><a href="/task-plan">任务计划</a></div>
+                <div class="agent-empty" id="agent-current-empty">选择历史 Run，或发起一次 Agent 请求。</div>
+                <div id="agent-current-run" style="display:none">
+                    <div class="agent-current-title-row"><strong id="agent-current-title"></strong><span id="agent-current-status" class="agent-status"></span></div>
+                    <small id="agent-current-meta"></small>
+                    <div class="agent-current-budget" id="agent-current-budget"></div>
+                    <div class="agent-current-failure" id="agent-current-failure" style="display:none"></div>
+                    <div class="agent-current-actions">
+                        <button type="button" class="btn btn-sm btn-outline-danger" id="agent-cancel-run">取消 Run</button>
+                        <button type="button" class="btn btn-sm btn-primary" id="agent-retry-run">重试</button>
+                    </div>
+                </div>
+            </section>
+            <section class="agent-workbench-section">
+                <div class="agent-section-heading"><span>计划与工具步骤</span><small>参数已隐藏</small></div>
+                <div id="agent-run-steps"><div class="agent-empty">运行步骤会显示在这里。</div></div>
+            </section>
+            <section class="agent-workbench-section">
+                <div class="agent-section-heading"><span>引用证据</span><small>仅展示命中片段</small></div>
+                <div id="agent-run-evidence"><div class="agent-empty">回答引用会显示在这里。</div></div>
+            </section>
+            <section class="agent-workbench-section agent-history-section">
+                <div class="agent-section-heading"><span>历史任务</span><small>最近 12 条</small></div>
+                <div id="agent-run-list"><div class="agent-empty">正在加载…</div></div>
+            </section>
+        </aside>
     </div>
     <!-- 底部信息 -->
     <div th:replace="components/layout/footer :: footer"></div>
@@ -88,6 +130,22 @@
 
     // 从 global.user.photo 中取出用户头像 thymeleaf 传入的值
     const isLogin = [[${global.isLogin}]], user = [[${global.user}]];
+
+    CodeMateAgentWorkbench.init({
+        isLogin: isLogin,
+        retry: function (run) {
+            const mode = run.mode === 'KNOWLEDGE_QA' || run.mode === 'BUG_DIAGNOSIS' ? run.mode : 'CHAT';
+            $('#agent-mode').val(mode).trigger('change');
+            inputField.val(run.goal || '').focus();
+            $('#agent-workbench').removeClass('is-open');
+            $('#agent-workbench-toggle').attr('aria-expanded', 'false');
+            if (!wsConnected) {
+                toastr.warning('连接尚未恢复，内容已填回输入框，请重连后发送。');
+                return;
+            }
+            doSend();
+        }
+    });
 
 
     // 页面加载完成后，执行 initWs
@@ -137,6 +195,7 @@
         stompClient.connect({}, function (frame) {
             console.log('ws连接成功: ' + frame);
             wsConnected = true;
+            CodeMateAgentWorkbench.connected();
             inputField.removeAttr("disabled");
             // 改变 inputField 的 placeholder
             inputField.val("");
@@ -201,6 +260,7 @@
         }
         console.log("ws中断");
         wsConnected = false;
+        CodeMateAgentWorkbench.interrupted();
         stompClient = null;
         // 提醒用户重新连接
         inputField.attr("disabled", "disabled").val("连接中断，点击右侧按钮重连");
@@ -245,6 +305,7 @@
     }
 
     function appendServerMessage(answer) {
+        CodeMateAgentWorkbench.onAnswer(answer);
         let content = answer.answer;
         let draftContent = content;
         let time = answer.answerTime;
@@ -463,6 +524,7 @@
         }
         const request = agentMode === 'CHAT' ? qa : '__codemate_agent__:' + agentMode + ':' + qa;
         stompClient.send("/app/chat/" + session + "/" + lastChatId, {'s-uid': session}, request);
+        CodeMateAgentWorkbench.streamStarted();
         // 清空 textarea
         inputField.val("");
 
@@ -488,6 +550,7 @@
         }
         const taskPlanQuestion = '__codemate_task_plan__:' + goal.trim();
         stompClient.send("/app/chat/" + session + "/" + lastChatId, {'s-uid': session}, taskPlanQuestion);
+        CodeMateAgentWorkbench.streamStarted();
         addClientMsg(('任务规划：' + goal.trim()).replace(/\n/g, "<br/>"), true);
         sendBtn.attr("disabled", true);
     });

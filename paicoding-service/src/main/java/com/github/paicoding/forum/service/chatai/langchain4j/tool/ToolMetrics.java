@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,7 @@ public class ToolMetrics {
     private final MeterRegistry registry;
     private final MeterRegistry fallbackRegistry = new SimpleMeterRegistry();
 
+    @Autowired
     public ToolMetrics(ObjectProvider<MeterRegistry> registryProvider) {
         this.registry = registryProvider.getIfAvailable();
     }

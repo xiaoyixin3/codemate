@@ -18,4 +18,7 @@ public interface AgentStreamObserver {
 
     default void onToolExecuted(ToolExecution execution) {
     }
+
+    default void onFallback(String notice) {
+    }
 }

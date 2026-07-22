@@ -15,6 +15,7 @@ import com.github.paicoding.forum.service.chatai.constants.ChatConstants;
 import com.github.paicoding.forum.service.chatai.langchain4j.service.AgentStreamObserver;
 import com.github.paicoding.forum.service.chatai.langchain4j.service.LangChain4jAgentOrchestrator;
 import com.github.paicoding.forum.service.chatai.langchain4j.config.LangChain4jProperties;
+import com.github.paicoding.forum.service.chatai.langchain4j.reliability.ModelFailureClassifier;
 import com.github.paicoding.forum.service.agentrun.service.AgentRunService;
 import com.github.paicoding.forum.service.bugdiagnosis.service.BugDiagnosisService;
 import com.github.paicoding.forum.api.model.enums.ai.AgentRunStatusEnum;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /** DeepSeek chat implementation. Agent-specific behavior is delegated to registered handlers. */
 @Slf4j
@@ -50,6 +52,8 @@ public class DeepSeekChatServiceImpl extends AbsChatService {
     private BugDiagnosisService bugDiagnosisService;
     @Autowired
     private LangChain4jProperties langChain4jProperties;
+    @Autowired
+    private ModelFailureClassifier modelFailureClassifier;
 
     @Override
     public AiChatStatEnum doAnswer(Long user, ChatItemVo chat) {
@@ -58,7 +62,7 @@ public class DeepSeekChatServiceImpl extends AbsChatService {
         String normalizedInput = handler.validateAndNormalize(request.getInput());
         chat.setQuestion(handler.displayQuestion(normalizedInput)).setAgentMode(request.getMode().name());
         Long runId = agentRunService.create(user, ReqInfoContext.getReqInfo().getChatId(),
-                request.getMode().name(), normalizedInput, langChain4jProperties.getChatModel());
+                request.getMode().name(), normalizedInput, activeModelName());
         chat.setAgentRunId(runId);
         agentRunService.transition(runId, AgentRunStatusEnum.PLANNING);
         agentRunService.transition(runId, AgentRunStatusEnum.EXECUTING);
@@ -97,7 +101,7 @@ public class DeepSeekChatServiceImpl extends AbsChatService {
         final Long runId;
         try {
             runId = agentRunService.create(user, ReqInfoContext.getReqInfo().getChatId(), mode.name(),
-                    normalizedInput, langChain4jProperties.getChatModel());
+                    normalizedInput, activeModelName());
             item.setAgentRunId(runId);
             agentRunService.transition(runId, AgentRunStatusEnum.PLANNING);
             agentRunService.transition(runId, AgentRunStatusEnum.EXECUTING);
@@ -108,6 +112,7 @@ public class DeepSeekChatServiceImpl extends AbsChatService {
         }
 
         if (langChain4jAgentOrchestrator.isAvailable()) {
+            AtomicBoolean degraded = new AtomicBoolean();
             try {
                 langChain4jAgentOrchestrator.stream(
                         mode,
@@ -135,8 +140,11 @@ public class DeepSeekChatServiceImpl extends AbsChatService {
                                     consumer.accept(AiChatStatEnum.ERROR, response);
                                     return;
                                 }
-                                if (!finishSuccessfulRun(user, mode, ReqInfoContext.getReqInfo().getChatId(),
-                                        item, runId, chatResponse)) {
+                                boolean finished = degraded.get()
+                                        ? completeDegradedRun(runId, chatResponse)
+                                        : finishSuccessfulRun(user, mode, ReqInfoContext.getReqInfo().getChatId(),
+                                                item, runId, chatResponse);
+                                if (!finished) {
                                     item.setAnswerType(ChatAnswerTypeEnum.STREAM_END);
                                     consumer.accept(AiChatStatEnum.ERROR, response);
                                     return;
@@ -147,12 +155,18 @@ public class DeepSeekChatServiceImpl extends AbsChatService {
 
                             @Override
                             public void onError(Throwable error) {
-                                failRun(runId, error.getClass().getSimpleName());
+                                failRun(runId, modelFailureClassifier.classify(error).name());
                                 log.warn("LangChain4j streaming request failed, mode={}", mode, error);
-                                String message = StringUtils.defaultIfBlank(error.getMessage(), error.getClass().getSimpleName());
-                                item.appendAnswer("\nAgent error: " + message)
+                                item.appendAnswer("\n" + modelFailureClassifier.publicMessage(error))
                                         .setAnswerType(ChatAnswerTypeEnum.STREAM_END);
                                 consumer.accept(AiChatStatEnum.ERROR, response);
+                            }
+
+                            @Override
+                            public void onFallback(String notice) {
+                                degraded.set(true);
+                                item.appendAnswer("\n\n> " + notice + "\n\n");
+                                consumer.accept(AiChatStatEnum.MID, response);
                             }
                         });
                 return AiChatStatEnum.IGNORE;
@@ -165,6 +179,8 @@ public class DeepSeekChatServiceImpl extends AbsChatService {
                     return AiChatStatEnum.IGNORE;
                 }
                 log.warn("LangChain4j could not start; falling back to the legacy DeepSeek stream, mode={}", mode, e);
+                item.appendAnswer("\n\n> Agent 模型暂不可用，已降级为普通问答；回答不会包含工具执行结果。\n\n");
+                consumer.accept(AiChatStatEnum.MID, response);
             }
         }
 
@@ -280,6 +296,19 @@ public class DeepSeekChatServiceImpl extends AbsChatService {
             agentRunService.fail(runId, reason);
         } catch (RuntimeException e) {
             log.error("Failed to persist Agent Run failure, runId={}", runId, e);
+        }
+    }
+
+    private boolean completeDegradedRun(Long runId, ChatResponse response) {
+        completeRun(runId, response);
+        return true;
+    }
+
+    private String activeModelName() {
+        try {
+            return langChain4jAgentOrchestrator.activeProviderName() + ":" + langChain4jAgentOrchestrator.activeModelName();
+        } catch (RuntimeException ignored) {
+            return langChain4jProperties.getProvider() + ":unavailable";
         }
     }
 

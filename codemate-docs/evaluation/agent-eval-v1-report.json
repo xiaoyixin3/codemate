@@ -1,0 +1,46 @@
+{
+  "version" : "agent-eval-v1",
+  "randomSeed" : 20260722,
+  "externalModelEnabled" : false,
+  "rag" : {
+    "caseCount" : 52,
+    "metrics" : {
+      "recallAt3" : 1.0,
+      "recallAt5" : 1.0,
+      "mrr" : 1.0,
+      "citationLegalRate" : 1.0,
+      "noEvidenceRefusalRate" : 0.5,
+      "averageLatencyMillis" : 23.25
+    }
+  },
+  "taskPlanning" : {
+    "caseCount" : 2,
+    "metrics" : {
+      "jsonParseSuccessRate" : 0.5,
+      "stepCompletenessRate" : 0.5,
+      "verificationStepRate" : 0.5,
+      "stateMachineLegalRate" : 0.5
+    }
+  },
+  "toolCalling" : {
+    "caseCount" : 3,
+    "metrics" : {
+      "toolSelectionAccuracy" : 0.6666666666666666,
+      "parameterValidityRate" : 0.6666666666666666,
+      "invocationSuccessRate" : 0.6666666666666666,
+      "duplicateInvocationRate" : 0.3333333333333333,
+      "unauthorizedBlockRate" : 1.0
+    }
+  },
+  "bugDiagnosis" : {
+    "caseCount" : 2,
+    "metrics" : {
+      "jsonParseSuccessRate" : 0.5,
+      "hypothesisPresenceRate" : 0.5,
+      "evidencePresenceRate" : 0.5,
+      "verificationPresenceRate" : 0.5,
+      "regressionPresenceRate" : 0.5,
+      "completeDiagnosisRate" : 0.5
+    }
+  }
+}
