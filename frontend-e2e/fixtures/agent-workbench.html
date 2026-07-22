@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CodeMate Agent Workbench E2E</title>
+    <link rel="stylesheet" href="/assets/chat-home.css">
+    <style>
+        :root { --pai-brand-1-normal: #4f46e5; }
+        html, body { height: 100%; margin: 0; font-family: Arial, sans-serif; }
+        .chat-wrap { display: flex; height: 100%; padding: 16px; box-sizing: border-box; }
+        .chat-main { flex: 1; min-width: 0; }
+        button { cursor: pointer; }
+    </style>
+</head>
+<body>
+<div class="chat-wrap">
+    <main class="chat-main">
+        <div class="window-header">
+            <div class="window-header-title"><div class="window-header-main-title">CodeMate</div></div>
+            <div class="chat-type">
+                <button type="button" id="agent-workbench-toggle" aria-controls="agent-workbench" aria-expanded="false">Agent 工作台</button>
+                <select id="agent-mode">
+                    <option value="CHAT">普通聊天</option>
+                    <option value="KNOWLEDGE_QA">站内知识问答</option>
+                    <option value="BUG_DIAGNOSIS">Bug 排查</option>
+                </select>
+            </div>
+        </div>
+        <textarea id="input-field"></textarea>
+    </main>
+    <aside class="agent-workbench" id="agent-workbench" aria-label="Agent Run 工作台">
+        <div class="agent-workbench-header">
+            <div><strong>Agent 工作台</strong><small>运行状态、工具步骤与引用证据</small></div>
+            <div class="agent-workbench-header-actions">
+                <button type="button" id="agent-refresh-runs">刷新</button>
+                <button type="button" id="agent-workbench-close" aria-label="关闭 Agent 工作台">×</button>
+            </div>
+        </div>
+        <div class="agent-stream-state" id="agent-stream-state" data-state="idle" role="status">
+            <span class="agent-stream-dot"></span><span class="agent-stream-state-text">尚未连接</span>
+        </div>
+        <div class="agent-workbench-message" id="agent-workbench-message" role="alert" style="display:none"></div>
+        <section class="agent-workbench-section agent-current-section">
+            <div class="agent-section-heading"><span>当前 Run</span></div>
+            <div class="agent-empty" id="agent-current-empty">请选择 Run</div>
+            <div id="agent-current-run" style="display:none">
+                <div class="agent-current-title-row"><strong id="agent-current-title"></strong><span id="agent-current-status" class="agent-status"></span></div>
+                <small id="agent-current-meta"></small>
+                <div class="agent-current-budget" id="agent-current-budget"></div>
+                <div class="agent-current-failure" id="agent-current-failure" style="display:none"></div>
+                <div class="agent-current-actions">
+                    <button type="button" id="agent-cancel-run">取消 Run</button>
+                    <button type="button" id="agent-retry-run">重试</button>
+                </div>
+            </div>
+        </section>
+        <section class="agent-workbench-section"><div id="agent-run-steps"></div></section>
+        <section class="agent-workbench-section"><div id="agent-run-evidence"></div></section>
+        <section class="agent-workbench-section agent-history-section"><div id="agent-run-list"></div></section>
+    </aside>
+</div>
+<script src="/assets/jquery.js"></script>
+<script src="/assets/chat-agent-workbench.js"></script>
+<script>
+    window.__retryRun = null;
+    CodeMateAgentWorkbench.init({
+        isLogin: true,
+        pollInterval: 60000,
+        retry: function (run) {
+            window.__retryRun = run;
+            document.querySelector('#agent-mode').value = run.mode || 'CHAT';
+            document.querySelector('#input-field').value = run.goal || '';
+            document.querySelector('#agent-workbench').classList.remove('is-open');
+            document.querySelector('#agent-workbench-toggle').setAttribute('aria-expanded', 'false');
+        }
+    });
+</script>
+</body>
+</html>

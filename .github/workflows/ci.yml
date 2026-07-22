@@ -8,6 +8,26 @@ permissions:
   contents: read
 
 jobs:
+  agent-workbench-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install frontend E2E dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Test Agent workbench interactions
+        run: npm run test:e2e
+
   test:
     runs-on: ubuntu-latest
     services:
