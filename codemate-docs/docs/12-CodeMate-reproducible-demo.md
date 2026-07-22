@@ -35,7 +35,7 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\run-codemate-demo.ps1
 对应自动化场景为：
 
 ```text
-paicoding-web/src/test/java/com/github/paicoding/forum/test/codemate/CodeMateDemoScenarioTest.java
+codemate-web/src/test/java/com/github/paicoding/forum/test/codemate/CodeMateDemoScenarioTest.java
 ```
 
 它会验证：

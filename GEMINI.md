@@ -1,6 +1,6 @@
 # Project Overview
 
-This is a Java-based community system built with a multi-module Maven project structure. The backend is powered by the Spring Boot framework, and it utilizes a variety of technologies including MyBatis-Plus for data persistence, Redis for caching, and ElasticSearch for search functionalities. The project is organized into several modules: `paicoding-api`, `paicoding-core`, `paicoding-service`, `paicoding-ui`, and `paicoding-web`. The `paicoding-web` module serves as the main entry point for the application.
+This is a Java-based community system built with a multi-module Maven project structure. The backend is powered by the Spring Boot framework, and it utilizes a variety of technologies including MyBatis-Plus for data persistence, Redis for caching, and ElasticSearch for search functionalities. The project is organized into several modules: `codemate-api`, `codemate-core`, `codemate-service`, `codemate-ui`, and `codemate-web`. The `codemate-web` module serves as the main entry point for the application.
 
 # Building and Running
 
@@ -16,12 +16,12 @@ mvn clean install -DskipTests=true -Pprod
 
 ## Running the Application
 
-The main entry point for the application is the `com.github.paicoding.forum.web.QuickForumApplication` class in the `paicoding-web` module. You can run this class from your IDE to start the application.
+The main entry point for the application is the `com.github.paicoding.forum.web.QuickForumApplication` class in the `codemate-web` module. You can run this class from your IDE to start the application.
 
 Alternatively, you can run the application from the command line using the following command:
 
 ```bash
-java -jar paicoding-web/target/paicoding-web-0.0.1-SNAPSHOT.jar
+java -jar codemate-web/target/codemate-web-0.0.1-SNAPSHOT.jar
 ```
 
 # Development Conventions
@@ -36,4 +36,4 @@ The project includes tests written using JUnit and Spock. The tests are located 
 
 ## Configuration
 
-The project's configuration is managed through YAML files located in the `paicoding-web/src/main/resources` directory. The main configuration file is `application.yml`, which imports other configuration files for different aspects of the application.
+The project's configuration is managed through YAML files located in the `codemate-web/src/main/resources` directory. The main configuration file is `application.yml`, which imports other configuration files for different aspects of the application.

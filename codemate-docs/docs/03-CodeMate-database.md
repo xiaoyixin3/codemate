@@ -11,9 +11,9 @@ pai_coding
 项目通过 Liquibase 管理数据库初始化和后续表结构变更，初始化入口位于：
 
 ```text
-paicoding-web/src/main/resources/liquibase/master.xml
-paicoding-web/src/main/resources/liquibase/changelog/000_initial_schema.xml
-paicoding-web/src/main/resources/liquibase/data
+codemate-web/src/main/resources/liquibase/master.xml
+codemate-web/src/main/resources/liquibase/changelog/000_initial_schema.xml
+codemate-web/src/main/resources/liquibase/data
 ```
 
 当前改造策略仍然是“项目对外叫 CodeMate，代码内部暂时保留 paicoding 和 pai_coding”，因此数据库文档先基于现有表结构进行梳理，后续再按 CodeMate 业务表达逐步优化。

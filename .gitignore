@@ -46,16 +46,16 @@ pid.log
 
 
 # 支付证书相关移除
-paicoding-web/src/main/resources/cert
+codemate-web/src/main/resources/cert
 /.mvn
 *.class
-paicoding-web/src/test/java/com/github/paicoding/forum/test/ai/TestZhipu.java
-paicoding-web/src/test/java/com/github/paicoding/forum/test/ai/TestChatGPT.java
-paicoding-web/src/test/java/com/github/paicoding/forum/test/ai/TestChatGPT.java
-paicoding-web/src/test/java/com/github/paicoding/forum/test/ai/AllToolsTest.java
-paicoding-web/src/test/java/com/github/paicoding/forum/test/ai/TestChatGPT.java
-paicoding-web/src/main/java/com/github/paicoding/forum/web/javabetter/top/copydown/OSSUtil.java
-paicoding-web/src/main/java/com/github/paicoding/forum/web/javabetter/top/image/Convert2OSS.java
+codemate-web/src/test/java/com/github/paicoding/forum/test/ai/TestZhipu.java
+codemate-web/src/test/java/com/github/paicoding/forum/test/ai/TestChatGPT.java
+codemate-web/src/test/java/com/github/paicoding/forum/test/ai/TestChatGPT.java
+codemate-web/src/test/java/com/github/paicoding/forum/test/ai/AllToolsTest.java
+codemate-web/src/test/java/com/github/paicoding/forum/test/ai/TestChatGPT.java
+codemate-web/src/main/java/com/github/paicoding/forum/web/javabetter/top/copydown/OSSUtil.java
+codemate-web/src/main/java/com/github/paicoding/forum/web/javabetter/top/image/Convert2OSS.java
 
 # Local environment credentials (keep the template tracked)
 .env

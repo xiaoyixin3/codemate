@@ -4,16 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-PaiCoding (技术派) is a comprehensive community system built with Spring Boot, MyBatis-Plus, MySQL, Redis, ElasticSearch, MongoDB, Docker, and RabbitMQ. It's a modern social platform for technical content sharing with article publishing, search, comments, and user interaction features.
+CodeMate is a developer community and AI Agent system built with Spring Boot, MyBatis-Plus, MySQL, Redis, ElasticSearch, MongoDB, Docker, and RabbitMQ. It supports technical content sharing, retrieval-augmented generation, task planning, and observable Agent runs.
 
 ## Architecture
 
 ### Module Structure
-- **paicoding-api**: Common enums, entities, and DTOs/VOs
-- **paicoding-core**: Core utilities and components (search, cache, recommendations)
-- **paicoding-service**: Business logic and database operations
-- **paicoding-ui**: Frontend resources (HTML, JavaScript, CSS, Thymeleaf)
-- **paicoding-web**: Web layer, HTTP endpoints, application entry point
+- **codemate-api**: Common enums, entities, and DTOs/VOs
+- **codemate-core**: Core utilities and components (search, cache, recommendations)
+- **codemate-service**: Business logic and database operations
+- **codemate-ui**: Frontend resources (HTML, JavaScript, CSS, Thymeleaf)
+- **codemate-web**: Web layer, HTTP endpoints, application entry point
 
 ### Key Technologies
 - Spring Boot 2.7.1 with Java 8+
@@ -36,7 +36,7 @@ mvn clean install -DskipTests=true
 mvn clean install -DskipTests=true -Pprod
 
 # Build web module specifically
-cd paicoding-web
+cd codemate-web
 mvn clean package spring-boot:repackage -DskipTests=true -Pprod
 ```
 
@@ -64,8 +64,8 @@ mvn clean package -DskipTests=true -P<environment>
 
 #### Local Development
 1. Start required services: MySQL, Redis
-2. Configure database connection in `paicoding-web/src/main/resources-env/dev/application-dal.yml`
-3. Run main class: `QuickForumApplication` (paicoding-web module)
+2. Configure database connection in `codemate-web/src/main/resources-env/dev/application-dal.yml`
+3. Run main class: `QuickForumApplication` (codemate-web module)
 4. Access: http://127.0.0.1:8080
 
 #### Production Deployment
@@ -79,13 +79,13 @@ mvn clean package -DskipTests=true -P<environment>
 
 ### Database Setup
 - Database auto-creation on first startup
-- Schema managed via Liquibase migrations in `paicoding-web/src/main/resources/liquibase`
-- Default database name: `paicoding` (configurable via `database.name` property)
+- Schema managed via Liquibase migrations in `codemate-web/src/main/resources/liquibase`
+- Default database name: `pai_coding` (configurable via `database.name` property)
 
 ## Configuration
 
 ### Environment-Specific Configs
-Located in `paicoding-web/src/main/resources-env/<env>/`:
+Located in `codemate-web/src/main/resources-env/<env>/`:
 - `application-dal.yml`: Database configuration
 - `application-image.yml`: Image upload settings
 - `application-web.yml`: Web-related configuration
@@ -97,7 +97,7 @@ Located in `paicoding-web/src/main/resources-env/<env>/`:
 
 ## Important Notes
 
-- **Entry Point**: `QuickForumApplication.java` in paicoding-web module
+- **Entry Point**: `QuickForumApplication.java` in codemate-web module
 - **Default Port**: 8080 (automatically finds available port in dev mode)
 - **Auto-Configuration**: Database tables and initial data created automatically
 - **Dependencies**: All managed in root `pom.xml` via `dependencyManagement`
@@ -106,15 +106,15 @@ Located in `paicoding-web/src/main/resources-env/<env>/`:
 ## Development Guidelines
 
 ### Module Dependencies
-- paicoding-web depends on paicoding-ui and paicoding-service
-- paicoding-service depends on paicoding-core and paicoding-api
+- codemate-web depends on codemate-ui and codemate-service
+- codemate-service depends on codemate-core and codemate-api
 - Follow the layered architecture when adding new features
 
 ### Database Operations
 - Use MyBatis-Plus for database operations
 - Database schema changes should be added as Liquibase changesets
-- Entity classes located in paicoding-api module
+- Entity classes located in codemate-api module
 
 ### Frontend Development
-- Thymeleaf templates and static resources in paicoding-ui module
+- Thymeleaf templates and static resources in codemate-ui module
 - Supports Swagger UI at `/doc.html` for API documentation

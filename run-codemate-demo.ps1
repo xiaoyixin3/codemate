@@ -23,7 +23,7 @@ Write-Host 'The test uses DB_USERNAME/DB_PASSWORD, calls no paid model, and remo
 
 Push-Location $projectRoot
 try {
-    & $mavenCommand -pl paicoding-web -am '-Dtest=CodeMateDemoScenarioTest' '-Dsurefire.failIfNoSpecifiedTests=false' test
+    & $mavenCommand -pl codemate-web -am '-Dtest=CodeMateDemoScenarioTest' '-Dsurefire.failIfNoSpecifiedTests=false' test
     if ($LASTEXITCODE -ne 0) {
         throw "CodeMate demonstration failed with exit code $LASTEXITCODE"
     }

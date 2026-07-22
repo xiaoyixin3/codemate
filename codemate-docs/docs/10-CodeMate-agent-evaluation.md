@@ -2,7 +2,7 @@
 
 ## 设计目标
 
-第七阶段建立不依赖人工逐条阅读的离线评测套件。生产代码只包含指标计算、报告输出和版本比较逻辑；固定测试数据放在 `paicoding-service/src/test/resources/codemate`，不会打包成业务数据或触发线上模型调用。
+第七阶段建立不依赖人工逐条阅读的离线评测套件。生产代码只包含指标计算、报告输出和版本比较逻辑；固定测试数据放在 `codemate-service/src/test/resources/codemate`，不会打包成业务数据或触发线上模型调用。
 
 统一报告覆盖四类能力：
 
@@ -47,7 +47,7 @@ AGENT_EVAL_EXTERNAL_MODEL_ENABLED=false
 ## 验证命令
 
 ```bash
-mvn -pl paicoding-service -am "-Dtest=RagOfflineEvaluatorTest,AgentOfflineEvaluationSuiteTest,EvaluationPropertiesTest" "-Dsurefire.failIfNoSpecifiedTests=false" test
-mvn -pl paicoding-service -am test
+mvn -pl codemate-service -am "-Dtest=RagOfflineEvaluatorTest,AgentOfflineEvaluationSuiteTest,EvaluationPropertiesTest" "-Dsurefire.failIfNoSpecifiedTests=false" test
+mvn -pl codemate-service -am test
 mvn install -DskipTests=true
 ```

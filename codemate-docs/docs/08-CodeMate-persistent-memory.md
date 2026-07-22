@@ -40,7 +40,7 @@ DELETE /chat/api/memories/{memoryId}
 定向测试不调用外部模型：
 
 ```bash
-mvn -pl paicoding-service -am "-Dtest=PersistentChatMemoryStoreTest,TechnicalMemoryServiceTest,MemoryContextAssemblerTest,ConversationMemoryCleanupServiceTest,CodeMateChatMemoryProviderTest" "-Dsurefire.failIfNoSpecifiedTests=false" test
+mvn -pl codemate-service -am "-Dtest=PersistentChatMemoryStoreTest,TechnicalMemoryServiceTest,MemoryContextAssemblerTest,ConversationMemoryCleanupServiceTest,CodeMateChatMemoryProviderTest" "-Dsurefire.failIfNoSpecifiedTests=false" test
 ```
 
 覆盖进程重建恢复、跨实例读取、窗口摘要、上下文顺序、敏感信息拒绝、用户隔离和会话隐私清理。

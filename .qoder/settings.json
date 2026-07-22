@@ -1,12 +1,12 @@
 {
   "permissions": {
     "ask": [
-      "Read(!/Users/itwanger/Documents/GitHub/paicoding/**)",
-      "Edit(!/Users/itwanger/Documents/GitHub/paicoding/**)"
+      "Read(!/Users/itwanger/Documents/GitHub/codemate/**)",
+      "Edit(!/Users/itwanger/Documents/GitHub/codemate/**)"
     ],
     "allow": [
-      "Read(/Users/itwanger/Documents/GitHub/paicoding/**)",
-      "Edit(/Users/itwanger/Documents/GitHub/paicoding/**)"
+      "Read(/Users/itwanger/Documents/GitHub/codemate/**)",
+      "Edit(/Users/itwanger/Documents/GitHub/codemate/**)"
     ]
   },
   "memoryImport": {},
