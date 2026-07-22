@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet id="20260719_bug_diagnosis_plan_1" author="CodeMate">
+        <createTable tableName="ai_bug_diagnosis" remarks="Bug 诊断结构化预览与确认结果">
+            <column name="id" type="BIGINT" autoIncrement="true"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="run_id" type="BIGINT"><constraints nullable="false" unique="true" uniqueConstraintName="uk_bug_diagnosis_run"/></column>
+            <column name="user_id" type="BIGINT"><constraints nullable="false"/></column>
+            <column name="chat_id" type="VARCHAR(64)"/>
+            <column name="problem_summary" type="VARCHAR(1000)"><constraints nullable="false"/></column>
+            <column name="diagnosis_json" type="MEDIUMTEXT"><constraints nullable="false"/></column>
+            <column name="status" type="VARCHAR(32)"><constraints nullable="false"/></column>
+            <column name="confirm_idempotency_key" type="VARCHAR(64)"/>
+            <column name="plan_id" type="BIGINT"/>
+            <column name="confirmed_time" type="DATETIME"/>
+            <column name="create_time" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="update_time" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <createIndex tableName="ai_bug_diagnosis" indexName="idx_bug_diagnosis_user_created">
+            <column name="user_id"/><column name="create_time"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="20260719_bug_diagnosis_plan_2" author="CodeMate">
+        <createTable tableName="ai_task_write_audit" remarks="Agent 任务计划写操作审计与幂等记录">
+            <column name="id" type="BIGINT" autoIncrement="true"><constraints primaryKey="true" nullable="false"/></column>
+            <column name="user_id" type="BIGINT"><constraints nullable="false"/></column>
+            <column name="run_id" type="BIGINT"/>
+            <column name="plan_id" type="BIGINT"/>
+            <column name="step_id" type="BIGINT"/>
+            <column name="action" type="VARCHAR(64)"><constraints nullable="false"/></column>
+            <column name="idempotency_key" type="VARCHAR(64)"><constraints nullable="false"/></column>
+            <column name="result_summary" type="VARCHAR(512)"/>
+            <column name="create_time" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="update_time" type="DATETIME" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+        <addUniqueConstraint tableName="ai_task_write_audit" columnNames="user_id,action,idempotency_key"
+                             constraintName="uk_task_write_user_action_key"/>
+        <createIndex tableName="ai_task_write_audit" indexName="idx_task_write_plan_created">
+            <column name="plan_id"/><column name="create_time"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

@@ -41,6 +41,7 @@ public class KnowledgeRagAdminController {
         status.put("model", langChain4jProperties.getChatModel());
         status.put("fallbackEnabled", langChain4jProperties.isFallbackEnabled());
         status.put("activeMemories", chatMemoryProvider.activeMemoryCount());
+        status.put("rag", knowledgeRagService.diagnostics());
         return ResVo.ok(status);
     }
 
@@ -57,8 +58,9 @@ public class KnowledgeRagAdminController {
     }
 
     @GetMapping("/search")
-    @ApiOperation("调试向量 Top-K 检索结果")
-    public ResVo<List<RagSearchResult>> search(@RequestParam String question) {
-        return ResVo.ok(knowledgeRagService.search(question));
+    @ApiOperation("调试混合检索各阶段分数与排序原因")
+    public ResVo<List<RagSearchResult>> search(@RequestParam String question,
+                                               @RequestParam(defaultValue = "10") int limit) {
+        return ResVo.ok(knowledgeRagService.search(question, limit));
     }
 }

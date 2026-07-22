@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
+import java.util.List;
 
 /**
  * 一次qa的聊天记录
@@ -51,6 +52,11 @@ public class ChatItemVo implements Serializable, Cloneable {
 
     /** CodeMate mode used to generate this answer; null means legacy plain chat. */
     private String agentMode;
+    private Long agentRunId;
+    /** Present only after a structured Bug diagnosis preview has been persisted. */
+    private Long diagnosisId;
+    /** Authoritative citations derived only from chunks retrieved for this answer. */
+    private List<AiCitationVo> citations;
 
     /**
      * 记录问题及记录时间
@@ -115,6 +121,9 @@ public class ChatItemVo implements Serializable, Cloneable {
         item.answer = answer;
         item.answerTime = answerTime;
         item.agentMode = agentMode;
+        item.agentRunId = agentRunId;
+        item.diagnosisId = diagnosisId;
+        item.citations = citations;
         return item;
     }
 }

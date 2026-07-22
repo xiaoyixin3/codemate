@@ -1,0 +1,10 @@
+{
+  "name": "paicoding-frontend-e2e",
+  "private": true,
+  "scripts": {
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "playwright": "1.61.1"
+  }
+}

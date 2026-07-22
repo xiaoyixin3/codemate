@@ -1,5 +1,17 @@
 # CodeMate 核心接口说明
 
+## Agent Run 只读轨迹接口
+
+以下接口要求登录，后端始终使用可信会话用户过滤数据，不接受客户端传入 `userId`：
+
+| 方法 | 地址 | 说明 |
+|---|---|---|
+| GET | `/agent-run/api?limit=20` | 查询当前用户最近的 Agent Run |
+| GET | `/agent-run/api/{runId}` | 查询 Run、工具步骤和 RAG 证据详情 |
+| PUT | `/agent-run/api/{runId}/cancel` | 将当前用户拥有的非终态 Run 标记为取消 |
+
+详情响应包含状态、模型、Token、工具调用次数、配置限额、失败原因、步骤和证据。其他用户的 Run 会统一按不存在或无权访问处理。
+
 ## 一、接口文档定位
 
 本文档用于梳理 CodeMate 技术社区后端系统的核心接口能力，方便后续编写 README、简历描述和面试讲解稿。
@@ -489,3 +501,29 @@ GET /rank/api/articles/hot?period=day&page=1&pageSize=10
 5. 增加未读消息统计接口。
 6. 增加热门文章排行榜接口。
 7. 增加接口限流和操作日志接口切面。
+
+## 十四、Bug 诊断与修复计划接口
+
+Bug 诊断完成后只生成结构化预览，不会自动写任务计划。预览归属当前登录用户，确认接口使用诊断行锁、计划唯一键和审计唯一键保证重复或并发请求只创建一份计划。
+
+```text
+GET  /bug-diagnosis/api/{diagnosisId}
+POST /bug-diagnosis/api/{diagnosisId}/confirm
+```
+
+确认请求为 `{"idempotencyKey":"bug-confirm-<8到64位安全字符>"}`，成功返回 `diagnosisId`、`planId` 和 `planUrl`。未登录、跨用户诊断和非法幂等键都会被拒绝；已确认诊断始终返回原计划 ID。
+
+任务写工具为 `createTaskPlan`、`addTaskPlanStep`、`updateTaskStepStatus`、`recordTaskStepResult`。身份由服务端可信工具上下文绑定，不接受模型提供的 `userId`；每次成功写入都会记录到 `ai_task_write_audit`。
+
+## 十五、RAG 管理与调试接口
+
+以下接口仅管理员可访问：
+
+```text
+GET  /api/admin/ai/rag/status
+POST /api/admin/ai/rag/index?articleId={articleId}
+POST /api/admin/ai/rag/index-all
+GET  /api/admin/ai/rag/search?question={question}&limit=10
+```
+
+调试检索返回 `vectorScore`、`keywordScore`、`freshnessScore`、最终 `score` 和 `rankingReasons`。聊天回答中的 `citations` 包含 citationIndex、articleId、chunkIndex、标题、小标题、证据摘要和相关度；这些字段只能由本次检索结果生成。

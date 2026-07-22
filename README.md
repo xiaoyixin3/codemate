@@ -101,6 +101,33 @@ paicoding
 - [个人化配置清单](codemate-docs/docs/05-CodeMate-personalization.md)
 - [Agent 与站内知识 RAG](codemate-docs/docs/06-CodeMate-agent-rag.md)
 - [LangChain4j Agent 实战说明](codemate-docs/docs/07-CodeMate-LangChain4j-Agent.md)
+- [持久化会话记忆](codemate-docs/docs/08-CodeMate-persistent-memory.md)
+- [模型抽象与可靠性](codemate-docs/docs/09-CodeMate-model-reliability.md)
+- [Agent 离线评估](codemate-docs/docs/10-CodeMate-agent-evaluation.md)
+- [Agent 工作台](codemate-docs/docs/11-CodeMate-agent-workbench.md)
+- [Agent 可复现演示](codemate-docs/docs/12-CodeMate-reproducible-demo.md)
+
+### Agent 演示预检
+
+配置当前终端的 `DB_USERNAME`、`DB_PASSWORD` 后，可运行不依赖付费模型的完整闭环验收：
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\run-codemate-demo.ps1
+```
+
+该场景覆盖站内文章检索、证据记录、Bug 诊断确认、修复计划创建、步骤执行结果和 Agent Run 轨迹，并在结束后自动清理隔离的演示数据。
+
+### Agent 工作台前端验收
+
+安装 Node.js 22 后，可运行不依赖后端服务和付费模型的 Playwright 交互测试：
+
+```bash
+npm ci
+npx playwright install chromium
+npm run test:e2e
+```
+
+测试直接加载生产环境的 Agent 工作台 JavaScript 和 CSS，覆盖 Run 详情与证据展示、敏感参数隐藏、历史切换、失败重试、取消、移动端抽屉和接口错误提示。
 
 ## 已完成改造
 

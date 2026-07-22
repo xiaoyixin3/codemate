@@ -1,6 +1,7 @@
 package com.github.paicoding.forum.service.user.repository.dao;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.paicoding.forum.service.user.repository.entity.UserAiHistoryDO;
 import com.github.paicoding.forum.service.user.repository.mapper.UserAiHistoryMapper;
 import org.springframework.stereotype.Repository;
@@ -12,5 +13,12 @@ public class UserAiHistoryDao extends ServiceImpl<UserAiHistoryMapper, UserAiHis
 
     @Resource
     private UserAiHistoryMapper userAiHistoryMapper;
+
+    public void removeConversation(Long userId, Integer aiType, String chatId) {
+        remove(Wrappers.<UserAiHistoryDO>lambdaQuery()
+                .eq(UserAiHistoryDO::getUserId, userId)
+                .eq(UserAiHistoryDO::getAiType, aiType)
+                .eq(UserAiHistoryDO::getChatId, chatId));
+    }
 }
 

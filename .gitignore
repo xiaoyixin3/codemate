@@ -72,3 +72,9 @@ tmp_*.png
 # Separate local workspaces and resume-generation utilities
 sites/
 tools/
+
+# Frontend E2E dependencies and local Playwright artifacts
+node_modules/
+.npm-cache/
+playwright-report/
+test-results/

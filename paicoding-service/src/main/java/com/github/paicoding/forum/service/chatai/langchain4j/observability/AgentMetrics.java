@@ -1,6 +1,7 @@
 package com.github.paicoding.forum.service.chatai.langchain4j.observability;
 
 import com.github.paicoding.forum.service.chatai.agent.AgentMode;
+import com.github.paicoding.forum.service.chatai.langchain4j.reliability.ModelFailureType;
 import dev.langchain4j.model.output.TokenUsage;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -20,23 +21,34 @@ public class AgentMetrics {
         this.registry = registryProvider.getIfAvailable();
     }
 
-    public void request(AgentMode mode) {
-        counter("codemate.agent.requests", mode).increment();
+    public void request(AgentMode mode, String provider) {
+        counter("codemate.agent.requests", mode, provider).increment();
     }
 
-    public void success(AgentMode mode, Duration duration, TokenUsage tokenUsage) {
-        counter("codemate.agent.success", mode).increment();
-        timer("codemate.agent.duration", mode).record(duration);
+    public void firstToken(AgentMode mode, String provider, Duration duration) {
+        timer("codemate.agent.first_token", mode, provider).record(duration);
+    }
+
+    public void success(AgentMode mode, String provider, Duration duration, TokenUsage tokenUsage) {
+        counter("codemate.agent.success", mode, provider).increment();
+        timer("codemate.agent.duration", mode, provider).record(duration);
         if (tokenUsage != null && tokenUsage.totalTokenCount() != null) {
             Counter.builder("codemate.agent.tokens")
                     .tag("mode", mode.name())
+                    .tag("provider", provider)
                     .register(activeRegistry())
                     .increment(tokenUsage.totalTokenCount());
         }
     }
 
-    public void error(AgentMode mode) {
-        counter("codemate.agent.errors", mode).increment();
+    public void error(AgentMode mode, String provider, ModelFailureType type) {
+        Counter.builder("codemate.agent.errors").tag("mode", mode.name()).tag("provider", provider)
+                .tag("type", type.name()).register(activeRegistry()).increment();
+    }
+
+    public void fallback(AgentMode from, AgentMode to, String provider) {
+        Counter.builder("codemate.agent.fallbacks").tag("from", from.name()).tag("to", to.name())
+                .tag("provider", provider).register(activeRegistry()).increment();
     }
 
     public void retrieved(AgentMode mode, int count) {
@@ -56,12 +68,12 @@ public class AgentMetrics {
                 .increment();
     }
 
-    private Counter counter(String name, AgentMode mode) {
-        return Counter.builder(name).tag("mode", mode.name()).register(activeRegistry());
+    private Counter counter(String name, AgentMode mode, String provider) {
+        return Counter.builder(name).tag("mode", mode.name()).tag("provider", provider).register(activeRegistry());
     }
 
-    private Timer timer(String name, AgentMode mode) {
-        return Timer.builder(name).tag("mode", mode.name()).register(activeRegistry());
+    private Timer timer(String name, AgentMode mode, String provider) {
+        return Timer.builder(name).tag("mode", mode.name()).tag("provider", provider).register(activeRegistry());
     }
 
     private MeterRegistry activeRegistry() {

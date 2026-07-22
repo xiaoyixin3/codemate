@@ -250,6 +250,33 @@ public class ArticleDao extends ServiceImpl<ArticleMapper, ArticleDO> {
         return baseMapper.selectList(query);
     }
 
+    public ArticleDO getPublishedArticle(Long articleId) {
+        return lambdaQuery().eq(ArticleDO::getId, articleId)
+                .eq(ArticleDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .eq(ArticleDO::getStatus, PushStatusEnum.ONLINE.getCode())
+                .one();
+    }
+
+    public List<ArticleDO> listPublishedArticles(Long categoryId, List<Long> articleIds, int limit) {
+        LambdaQueryWrapper<ArticleDO> query = Wrappers.lambdaQuery();
+        query.eq(ArticleDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .eq(ArticleDO::getStatus, PushStatusEnum.ONLINE.getCode());
+        if (categoryId != null) {
+            query.eq(ArticleDO::getCategoryId, categoryId);
+        }
+        if (articleIds != null) {
+            if (articleIds.isEmpty()) {
+                return new ArrayList<>();
+            }
+            query.in(ArticleDO::getId, articleIds);
+        }
+        query.select(ArticleDO::getId, ArticleDO::getTitle, ArticleDO::getShortTitle,
+                        ArticleDO::getSummary, ArticleDO::getCategoryId)
+                .orderByDesc(ArticleDO::getId)
+                .last("limit " + limit);
+        return baseMapper.selectList(query);
+    }
+
 
     /**
      * 阅读计数

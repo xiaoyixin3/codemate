@@ -8,4 +8,5 @@ import lombok.Data;
 @Data
 public class AiTaskPlanStepResultUpdateReq {
     private String actualOutput;
+    private String idempotencyKey;
 }

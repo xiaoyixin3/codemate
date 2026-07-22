@@ -1,0 +1,26 @@
+{
+  "dataset": "paicoding-service/src/test/resources/codemate/rag-eval-v1.csv",
+  "datasetSize": 50,
+  "generatedBy": "RagOfflineEvaluatorTest",
+  "baseline": {
+    "strategy": "mysql-vector-candidate-scan",
+    "recallAt3": 0.60,
+    "recallAt5": 0.80,
+    "mrr": 0.416667,
+    "citationLegalRate": 1.0,
+    "averageLatencyMillis": 18.0
+  },
+  "hybrid": {
+    "strategy": "keyword-vector-freshness-rerank",
+    "recallAt3": 1.0,
+    "recallAt5": 1.0,
+    "mrr": 1.0,
+    "citationLegalRate": 1.0,
+    "averageLatencyMillis": 24.0
+  },
+  "notes": [
+    "Deterministic offline regression fixture; no paid model or production traffic is used.",
+    "Latency values are fixed fixture values for report-pipeline verification, not a production benchmark.",
+    "Production candidate counts and latency are exposed through Micrometer metrics."
+  ]
+}

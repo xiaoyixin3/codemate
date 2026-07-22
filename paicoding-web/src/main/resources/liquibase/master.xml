@@ -10,5 +10,9 @@
     <include file="liquibase/changelog/20260716_remove_legacy_star_promotion.xml" relativeToChangelogFile="false"/>
     <include file="liquibase/changelog/20260716_seed_community_content.xml" relativeToChangelogFile="false"/>
     <include file="liquibase/changelog/20260717_add_ai_knowledge_rag.xml" relativeToChangelogFile="false"/>
+    <include file="liquibase/changelog/20260719_add_ai_agent_run.xml" relativeToChangelogFile="false"/>
+    <include file="liquibase/changelog/20260719_add_bug_diagnosis_plan_flow.xml" relativeToChangelogFile="false"/>
+    <include file="liquibase/changelog/20260719_upgrade_ai_knowledge_hybrid.xml" relativeToChangelogFile="false"/>
+    <include file="liquibase/changelog/20260719_add_persistent_memory.xml" relativeToChangelogFile="false"/>
 
 </databaseChangeLog>

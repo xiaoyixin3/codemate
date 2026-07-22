@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 文章标签映mapper接口
@@ -86,5 +87,13 @@ public class ArticleTagDao extends ServiceImpl<ArticleTagMapper, ArticleTagDO> {
 
     public List<ArticleTagDO> listArticleTags(@Param("articleId") Long articleId) {
         return lambdaQuery().eq(ArticleTagDO::getArticleId, articleId).eq(ArticleTagDO::getDeleted, YesOrNoEnum.NO.getCode()).list();
+    }
+
+    public List<Long> listArticleIdsByTagId(Long tagId, int limit) {
+        return lambdaQuery().select(ArticleTagDO::getArticleId)
+                .eq(ArticleTagDO::getTagId, tagId)
+                .eq(ArticleTagDO::getDeleted, YesOrNoEnum.NO.getCode())
+                .last("limit " + limit)
+                .list().stream().map(ArticleTagDO::getArticleId).collect(Collectors.toList());
     }
 }
