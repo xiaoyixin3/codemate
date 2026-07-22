@@ -1,7 +1,7 @@
 FROM maven:3.9.14-eclipse-temurin-17 AS build
 WORKDIR /workspace
 COPY . .
-RUN chmod +x mvnw && ./mvnw -pl paicoding-web -am package -DskipTests -Pprod
+RUN mvn --batch-mode --no-transfer-progress -pl paicoding-web -am package -DskipTests -Pprod
 
 FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app

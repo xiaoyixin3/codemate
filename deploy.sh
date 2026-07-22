@@ -17,8 +17,8 @@ RESTART_FUNC_NAME="restart"
 
 #env, ssh remote, work dir
 ENV_PRO="prod"
-SSH_HOST_PRO=("admin@39.105.208.175")
-WORK_DIR_PRO="/home/admin/workspace/paicoding-forum/"
+SSH_HOST_PRO=("${DEPLOY_SSH_HOST:-}")
+WORK_DIR_PRO="${DEPLOY_WORK_DIR:-}"
 
 
 # log file
@@ -112,6 +112,13 @@ function deploy() {
     fi
 
     if [ "$1" = "${ENV_PRO}" ]; then
+        if [[ -z "${SSH_HOST_PRO[0]}" || -z "${WORK_DIR_PRO}" ]]; then
+            echo 'Set DEPLOY_SSH_HOST and DEPLOY_WORK_DIR before deploying.'
+            exit 1
+        fi
+        if [[ "${WORK_DIR_PRO}" != */ ]]; then
+            WORK_DIR_PRO="${WORK_DIR_PRO}/"
+        fi
         SSH_HOST=${SSH_HOST_PRO[@]}
         WORK_DIR=${WORK_DIR_PRO}
     else

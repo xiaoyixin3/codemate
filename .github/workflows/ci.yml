@@ -8,6 +8,17 @@ permissions:
   contents: read
 
 jobs:
+  deployment-config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Validate deployment shell script
+        run: bash -n deploy.sh
+
+      - name: Validate production Compose configuration
+        run: docker compose --env-file deploy/.env.production.example -f deploy/docker-compose.prod.yml config --quiet
+
   agent-workbench-e2e:
     runs-on: ubuntu-latest
     steps:

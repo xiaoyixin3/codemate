@@ -1,0 +1,12 @@
+.git
+.github
+.idea
+.npm-cache
+**/node_modules
+**/target
+logs
+output
+playwright-report
+test-results
+sites
+tools
