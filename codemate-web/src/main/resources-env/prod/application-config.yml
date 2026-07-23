@@ -8,7 +8,7 @@ view:
     pageSize: 20
     cdnImgStyle:
     websiteRecord:
-    host: ${SITE_HOST:http://127.0.0.1:8080}
+    host: ${SITE_HOST:http://43.136.86.251/}
     welcomeInfo: Welcome to CodeMate
     oss: ${STATIC_RESOURCE_HOST:}
 
