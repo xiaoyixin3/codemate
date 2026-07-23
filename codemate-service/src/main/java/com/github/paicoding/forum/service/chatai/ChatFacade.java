@@ -45,17 +45,17 @@ public class ChatFacade {
     private Supplier<AISourceEnum> aiSourceCache;
 
     /**
-     * 返回推荐的AI模型
+     * 返回推荐的AI模型，当前固定使用 DeepSeek
      *
      * @return
      */
     public AISourceEnum getRecommendAiSource() {
         if (aiSourceCache == null) {
-            refreshAiSourceCache(Collections.emptySet());
+            refreshAiSourceCache(AISourceEnum.DEEP_SEEK);
         }
         AISourceEnum sourceEnum = aiSourceCache.get();
         if (sourceEnum == null) {
-            refreshAiSourceCache(getRecommendAiSource(Collections.emptySet()));
+            refreshAiSourceCache(AISourceEnum.DEEP_SEEK);
         }
         return aiSourceCache.get();
     }
@@ -65,48 +65,17 @@ public class ChatFacade {
     }
 
     public void refreshAiSourceCache(Set<AISourceEnum> except) {
-        refreshAiSourceCache(getRecommendAiSource(except));
+        refreshAiSourceCache(AISourceEnum.DEEP_SEEK);
     }
 
     /**
-     * 返回推荐的AI模型
+     * 返回推荐的AI模型 - 固定使用 DeepSeek
      *
-     * @param except 不选择的AI模型
-     * @return
+     * @param except 不选择的AI模型 (已弃用，固定返回 DeepSeek)
+     * @return 始终返回 DeepSeek
      */
     private AISourceEnum getRecommendAiSource(Set<AISourceEnum> except) {
-        AISourceEnum source;
-        try {
-            ChatGptIntegration.ChatGptConfig config = SpringUtil.getBean(ChatGptIntegration.ChatGptConfig.class);
-            if (!except.contains(AISourceEnum.CHAT_GPT_3_5) && !CollectionUtils.isEmpty(config.getConf()
-                    .get(config.getMain()).getKeys())) {
-                source = AISourceEnum.CHAT_GPT_3_5;
-            } else if (!except.contains(AISourceEnum.ZHI_PU_AI)  && StringUtils.isNotBlank(SpringUtil.getBean(ZhipuIntegration.ZhipuConfig.class)
-                    .getApiSecretKey())) {
-                source = AISourceEnum.ZHI_PU_AI;
-            } else if (!except.contains(AISourceEnum.XUN_FEI_AI) && StringUtils.isNotBlank(SpringUtil.getBean(XunFeiIntegration.XunFeiConfig.class)
-                    .getApiKey())) {
-                source = AISourceEnum.XUN_FEI_AI;
-            } else if (!except.contains(AISourceEnum.ALI_AI)) {
-                source = AISourceEnum.ALI_AI;
-            } else if(!except.contains(AISourceEnum.DEEP_SEEK)) {
-                source = AISourceEnum.DEEP_SEEK;
-            } else if(!except.contains(AISourceEnum.DOU_BAO_AI)) {
-                source = AISourceEnum.DOU_BAO_AI;
-            } else {
-                source = AISourceEnum.PAI_AI;
-            }
-        } catch (Exception e) {
-            source = AISourceEnum.PAI_AI;
-        }
-
-        if (source != AISourceEnum.PAI_AI && !aiConfig.getSource().contains(source)) {
-            Set<AISourceEnum> totalExcepts = Sets.newHashSet(except);
-            totalExcepts.add(source);
-            return getRecommendAiSource(totalExcepts);
-        }
-        log.info("当前选中的AI模型：{}", source);
-        return source;
+        return AISourceEnum.DEEP_SEEK;
     }
 
     /**
